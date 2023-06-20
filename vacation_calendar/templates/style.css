@@ -1,0 +1,12 @@
+body {
+  background-color: yellowgreen;
+}
+
+.topbar-left {
+  background-color: #292b2c;
+  height: 70px;
+}
+
+.logo {
+  height: 50px;
+}
