@@ -9,9 +9,21 @@
   </head>
   <body>
     <!-- Top Bar -->
+
     <div class="topbar">
-      <!-- Logo -->
-      <div class="topbar-left">
+      <div class="topbar-menu">
+        <div class="left">
+          <span class="nav-user-name"><h2>Hello, User</h2></span>
+        </div>
+        <div class="right">
+          <button>Log out</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Left Side -->
+    <div class="leftside">
+      <div class="logo">
         <a href="../dashboard.html">
           <span>
             <img
@@ -22,34 +34,42 @@
           </span>
         </a>
       </div>
+      <div class="leftside-menu">
+        <ul>
+          <li>
+            <a href="../dashboard.html">
+              <i class="fa-solid fa-calendar-days" style="color: #ffffff"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a href="../addevent.html">
+              <i class="fa-solid fa-plus" style="color: #ffffff"></i>
+              <span>Add Event</span>
+            </a>
+          </li>
+          <li>
+            <a href="../employees.html">
+              <i class="fa-solid fa-eye" style="color: #ffffff"></i>
+              <span>View Employees</span>
+            </a>
+          </li>
+        </ul>
+      </div>
     </div>
-    <!-- Navbar -->
-    <nav class="navbar">
-      <ul class="topbar-nav">
-        <li>
-          <span class="nav-user-name">Hello, User/span>
-        </li>
-        <li>
-          <button>Log out</button>
-        </li>
-      </ul>
-    </nav>
 
-    <!-- Left Side -->
-    <div class="left-sidenav">
-      <ul>
-        <li>
-          <a href="../dashboard.html">
-            <i class="fa-solid fa-bars"></i>
-            <span>Dashboard</span>
-          </a>
-        </li>
-        <li>Add Event</li>
-        <li>View Employees</li>
-      </ul>
+    <!-- Main BLock -->
+    <div class="main">
+      <div class="main-top">
+        <ul>
+          <span>Calendar</span>
+          <span>Year</span>
+          <i class="fa-solid fa-angle-up" style="color: #292b2c"></i>
+          <span>2023</span>
+          <i class="fa-solid fa-angle-down" style="color: #292b2c"></i>
+        </ul>
+      </div>
+      <div class="Calendar">calendar</div>
     </div>
-    <!-- Page Content -->
-
-    <script src="https://kit.fontawesome.com/65d2e5b72d.js" crossorigin="anonymous"></script>
   </body>
 </html>

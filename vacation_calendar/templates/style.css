@@ -1,12 +1,50 @@
 body {
-  background-color: yellowgreen;
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  grid-template-rows: 60px 1fr;
+  font-family: "Avenir Next LT W04 Regular", sans-serif;
+}
+h2 {
+  font-family: "Tw Cen MT W03 Medium Cond", sans-serif;
+  font-weight: 300;
 }
 
-.topbar-left {
+/* Top Bar */
+.topbar {
+  background-color: #ffffff;
+  grid-column: 2 / 3;
+  grid-row: 1 / 2;
+}
+
+.topbar-menu {
+  display: flex;
+  justify-content: space-between;
+  padding: 0px 5px;
+}
+
+.left,
+.right {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+}
+
+/* Left Side Bar */
+.leftside {
   background-color: #292b2c;
-  height: 70px;
+  grid-column: 1 / 2;
+  grid-row: 1 / 3;
 }
 
 .logo {
-  height: 50px;
+  text-align: center;
+  height: 60px;
+  padding-top: 10px;
+}
+
+/* Main Block */
+.main {
+  grid-column: 2 / 3;
+  grid-row: 2 / 3;
 }
