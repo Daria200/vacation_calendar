@@ -4,10 +4,11 @@ body {
   grid-template-columns: 300px 1fr;
   grid-template-rows: 60px 1fr;
   font-family: "Avenir Next LT W04 Regular", sans-serif;
+  margin: 0;
 }
 h2 {
   font-family: "Tw Cen MT W03 Medium Cond", sans-serif;
-  font-weight: 300;
+  font-weight: 350;
 }
 
 /* Top Bar */
@@ -27,7 +28,24 @@ h2 {
 .right {
   display: flex;
   align-items: center;
-  padding: 10px;
+  padding: 0px 20px;
+}
+
+.logout-btn {
+  border: none;
+  text-decoration: none;
+  background: #ffdb45;
+  color: #222;
+  margin: 0;
+  text-align: center;
+  font-family: "Tw Cen MT W04 Medium", sans-serif;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.logout-btn {
+  padding: 2px 16px;
+  font-size: 20px;
 }
 
 /* Left Side Bar */
@@ -41,6 +59,33 @@ h2 {
   text-align: center;
   height: 60px;
   padding-top: 10px;
+}
+
+.leftside-menu {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+ul {
+  list-style-type: none;
+}
+.leftside-menu ul {
+  display: flex;
+  flex-direction: column;
+  padding-top: 10px;
+}
+.menu-item {
+  padding: 20px 5px;
+}
+
+.menu-item a {
+  text-decoration: none;
+  color: #ffffff;
+}
+i {
+  padding: 0 5px;
 }
 
 /* Main Block */
