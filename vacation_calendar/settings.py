@@ -20,6 +20,11 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
+# Employees app stores data about the employes, manages employee profiles, authentication, and permissions
+# Calendarapp provides the calendar functionality, allowing employees to view their vacation days
+# and managers to see which employee took which days
+# Vacation app tracks vacation days for each employee
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -29,6 +34,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "employees",
     "calendarapp",
+    "vacations",
 ]
 
 MIDDLEWARE = [
@@ -46,7 +52,7 @@ ROOT_URLCONF = "vacation_calendar.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(BASE_DIR, "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
