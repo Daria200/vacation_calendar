@@ -1,3 +1,59 @@
 {% extends 'base.html' %} {% block content %}
-<h2>Employees' vacation days</h2>
+
+<div class="container">
+  <div class="row text-center">
+    <div class="col-md-10">
+      <!-- #TODO: -->
+      <form action="search.html">
+        <!-- Form Row 1 -->
+        <div class="form-row">
+          <div class="col-md-3 mb-2">
+            <label class="sr-only">Name</label>
+            <input
+              type="text"
+              name="name"
+              class="form-control"
+              placeholder="Name"
+            />
+          </div>
+
+          <div class="col-md-3 mb-2">
+            <label class="sr-only">City</label>
+            <input
+              type="text"
+              name="city"
+              class="form-control"
+              placeholder="City"
+            />
+          </div>
+
+          <div class="col-md-3 mb-2">
+            <label class="sr-only">Role</label>
+            <select name="Role" class="form-control">
+              <option selected="true" disabled="disabled">Choose role</option>
+              <option value="AL">Test Engineer</option>
+              <option value="AL">QA Consultant</option>
+              <option value="AL">HR-Manager</option>
+              <option value="AL">Software Test Automation</option>
+            </select>
+          </div>
+
+          <div class="col-md-3 mb-2">
+            <label class="sr-only">Manager</label>
+            <select name="Role" class="form-control">
+              <option selected="true" disabled="disabled">
+                Choose Manager
+              </option>
+              <option value="AL">Abdulkerim Corbo</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-block mt-4" type="submit">
+          Search
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
