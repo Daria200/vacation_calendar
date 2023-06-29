@@ -41,19 +41,25 @@
         <div class="leftside-menu">
           <ul>
             <li class="menu-item">
-              <a href="../dashboard.html">
+              <a href="{% url 'dashboard' %}">
                 <i class="fa-solid fa-calendar-days" style="color: #ffffff"></i>
                 <span>Dashboard</span>
               </a>
             </li>
             <li class="menu-item">
-              <a href="../addevent.html">
+              <a href="{% url 'add_event' %}">
                 <i class="fa-solid fa-plus" style="color: #ffffff"></i>
                 <span>Add Event</span>
               </a>
             </li>
             <li class="menu-item">
-              <a href="../employees.html">
+              <a href="{% url 'events' %}">
+                <i class="fa-solid fa-eye" style="color: #ffffff"></i>
+                <span>Events</span>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="{% url 'employee_calendar' %}">
                 <i class="fa-solid fa-eye" style="color: #ffffff"></i>
                 <span>View Employees</span>
               </a>
