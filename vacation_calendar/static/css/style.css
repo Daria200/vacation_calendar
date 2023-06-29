@@ -77,6 +77,10 @@ ul {
   text-decoration: none;
   color: #ffffff;
 }
+.active-link a {
+  color: #ffdb45;
+}
+
 i {
   padding: 0 5px;
 }

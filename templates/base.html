@@ -39,29 +39,52 @@
           </a>
         </div>
         <div class="leftside-menu">
+          <!-- TODO: works only for dashboard -->
           <ul>
-            <li class="menu-item">
+            <li 
+              {% if '/' == request.path %}
+                class="menu-item active-link"
+              {% else %}
+                class="menu-item"
+              {% endif %}
+              >
               <a href="{% url 'dashboard' %}">
-                <i class="fa-solid fa-calendar-days" style="color: #ffffff"></i>
-                <span>Dashboard</span>
+                <i class="fa-solid fa-calendar-days" style="color: #ffffff"></i>Dashboard
               </a>
             </li>
-            <li class="menu-item">
+            <li
+            {% if 'add_event' == request.path %}
+              class="menu-item active-link"
+            {% else %}
+              class="menu-item"
+            {% endif %}>
               <a href="{% url 'add_event' %}">
                 <i class="fa-solid fa-plus" style="color: #ffffff"></i>
-                <span>Add Event</span>
+                Add Event
               </a>
             </li>
-            <li class="menu-item">
+            <li 
+            {% if 'events' == request.path %}
+              class="menu-item active-link"
+            {% else %}
+              class="menu-item"
+            {% endif %}
+            >
               <a href="{% url 'events' %}">
                 <i class="fa-solid fa-eye" style="color: #ffffff"></i>
-                <span>Events</span>
+                Events
               </a>
             </li>
-            <li class="menu-item">
+            <li 
+            {% if 'employee_calendar' == request.path %}
+              class="menu-item active-link"
+            {% else %}
+              class="menu-item"
+            {% endif %}
+            >
               <a href="{% url 'employee_calendar' %}">
                 <i class="fa-solid fa-eye" style="color: #ffffff"></i>
-                <span>View Employees</span>
+                View Employees
               </a>
             </li>
           </ul>
