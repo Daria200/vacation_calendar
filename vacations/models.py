@@ -31,8 +31,14 @@ class PublicHolidays(models.Model):
         city_display = dict(self.CITY_CHOICES).get(self.city)
         return f"{city_display} {self.date}"
 
+    class Meta:
+        verbose_name_plural = "Public holidays"
+
 class ExtraDays(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     allotted_days = models.DecimalField(default=30, max_digits=2, decimal_places=1)
     transferred_days = models.DecimalField(default=0,max_digits=2, decimal_places=1)
     year = models.IntegerField()
+
+    class Meta:
+        verbose_name_plural = "Extra days"
