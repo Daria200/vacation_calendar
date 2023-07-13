@@ -27,6 +27,10 @@ class PublicHolidays(models.Model):
     city = models.IntegerField(choices=CITY_CHOICES)
     date = models.DateField()
 
+    def __str__(self):
+        city_display = dict(self.CITY_CHOICES).get(self.city)
+        return f"{city_display} {self.date}"
+
 class ExtraDays(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     allotted_days = models.DecimalField(default=30, max_digits=2, decimal_places=1)
