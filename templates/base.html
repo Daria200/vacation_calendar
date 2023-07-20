@@ -20,10 +20,14 @@
           <span class="nav-user-name "><h2>Hello, User</h2></span>
         </div>
         <div class="right col-4 d-flex justify-content-end">
-          <a href="../logout.html" class="logout-btn">Log out</a>
+          <!-- <a href="../logout.html" class="logout-btn">Log out</a> -->
+          <div class="container">
+            <a href="../logout.html" class="logout-btn btn btn-secondary btn-block col-md-6">Log out</a>
+         </div>
         </div>
       </div>
     </div>
+
 
     <!-- Left Side -->
     <div class="leftside">
@@ -39,23 +43,52 @@
           </a>
         </div>
         <div class="leftside-menu">
+          <!-- TODO: works only for dashboard -->
           <ul>
-            <li class="menu-item">
-              <a href="../dashboard.html">
-                <i class="fa-solid fa-calendar-days" style="color: #ffffff"></i>
-                <span>Dashboard</span>
+            <li 
+              {% if '/' == request.path %}
+                class="menu-item active-link"
+              {% else %}
+                class="menu-item"
+              {% endif %}
+              >
+              <a href="{% url 'dashboard' %}">
+                <i class="fa-solid fa-calendar-days" style="color: #ffffff"></i>Dashboard
               </a>
             </li>
-            <li class="menu-item">
-              <a href="../addevent.html">
+            <li
+            {% if '/add_event' == request.path %}
+              class="menu-item active-link"
+            {% else %}
+              class="menu-item"
+            {% endif %}>
+              <a href="{% url 'add_event' %}">
                 <i class="fa-solid fa-plus" style="color: #ffffff"></i>
-                <span>Add Event</span>
+                Add Event
               </a>
             </li>
-            <li class="menu-item">
-              <a href="../employees.html">
+            <li 
+            {% if '/events' == request.path %}
+              class="menu-item active-link"
+            {% else %}
+              class="menu-item"
+            {% endif %}
+            >
+              <a href="{% url 'events' %}">
                 <i class="fa-solid fa-eye" style="color: #ffffff"></i>
-                <span>View Employees</span>
+                Events
+              </a>
+            </li>
+            <li 
+            {% if '/employee_calendar' == request.path %}
+              class="menu-item active-link"
+            {% else %}
+              class="menu-item"
+            {% endif %}
+            >
+              <a href="{% url 'employee_calendar' %}">
+                <i class="fa-solid fa-eye" style="color: #ffffff"></i>
+                View Employees
               </a>
             </li>
           </ul>

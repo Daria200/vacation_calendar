@@ -1,3 +1,51 @@
 {% extends 'base.html' %} {% block content %}
-<h2>Search</h2>
+
+<div class="container">
+  <div class="row text-center">
+    <div class="col-md-10">
+      <!-- #TODO: -->
+      <form action="search.html">
+        <!-- Form Row 1 -->
+        <div class="form-row">
+          <div class="col-md-4 mb-2">
+            <label class="sr-only">Name</label>
+            <input
+              type="text"
+              name="name"
+              class="form-control"
+              placeholder="Name"
+            />
+          </div>
+
+          <div class="col-md-4 mb-2">
+            <label class="sr-only">City</label>
+            <select name="City" class="form-control">
+              <option selected="true" disabled="disabled">
+                Choose City
+              </option>
+              <option value="Frankfurt">Frankfurt</option>
+              <option value="Bonn">Bonn</option>
+              <option value="Munich">Munich</option>
+              <option value="Hamburg">Hamburg</option>
+            </select>
+          </div>
+
+          <div class="col-md-4 mb-2">
+            <label class="sr-only">Manager</label>
+            <select name="Role" class="form-control">
+              <option selected="true" disabled="disabled">
+                Choose Manager
+              </option>
+              <option value="Abdulkerim">Abdulkerim Corbo</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-block mt-4" type="submit">
+          Search
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
 {% endblock %}

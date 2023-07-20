@@ -1,4 +1,7 @@
-{% extends 'base.html' %} {% block content %}
+{% extends 'base.html' %} {% load static %} {% block content %} 
+{% block extracss %}
+<link href="{% static 'calender/main.css' %}" rel="stylesheet" />
+{% endblock extracss %}
 <div class="main">
   <div class="main-top">
     <ul>
@@ -9,6 +12,8 @@
       <i class="fa-solid fa-angle-down" style="color: #292b2c"></i>
     </ul>
   </div>
+
+  <!-- Calendar -->
   <div class="Calendar container">
     <div class="row justify-content-center">
       <div class="col-md-10">
@@ -17,6 +22,16 @@
             <div id="external-events">
               <h4 class="mb-4">Running Events</h4>
               <p>No Running Events Found</p>
+              <!-- TODO: make it work -->
+              <!-- {% for event in events_month %}
+              <div class="fc-event">
+                <h3>{{ event.title }}</h3>
+                <p>From: {{ event.start_time }}</p>
+                <p>To: {{ event.end_time }}</p>
+              </div>
+              {% empty %}
+              <p>No Running Events Found</p>
+              {% endfor %} -->
             </div>
           </div>
           <div class="col-md-9">
@@ -55,6 +70,7 @@
     </div>
   </div>
 </div>
+{% endblock content %} {% block extrascripts %}
 <script src="main.js"></script>
 <script>
   document.addEventListener("DOMContentLoaded", function () {
@@ -118,4 +134,4 @@
   src="https://kit.fontawesome.com/65d2e5b72d.js"
   crossorigin="anonymous"
 ></script>
-{% endblock %}
+{% endblock extrascripts %}
