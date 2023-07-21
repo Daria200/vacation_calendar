@@ -41,4 +41,4 @@ class AvailableDays(models.Model):
     year = models.IntegerField()
 
     class Meta:
-        verbose_name_plural = "Extra days"
+        verbose_name_plural = "Available days"
