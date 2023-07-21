@@ -34,11 +34,11 @@ class PublicHolidays(models.Model):
     class Meta:
         verbose_name_plural = "Public holidays"
 
-class ExtraDays(models.Model):
+class AvailableDays(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     allotted_days = models.DecimalField(default=30, max_digits=2, decimal_places=1)
     transferred_days = models.DecimalField(default=0,max_digits=2, decimal_places=1)
     year = models.IntegerField()
 
     class Meta:
-        verbose_name_plural = "Extra days"
+        verbose_name_plural = "Available days"
