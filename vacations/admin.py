@@ -1,9 +1,9 @@
-from django.contrib import admin
-
-from .models import Vacation, PublicHolidays, AvailableDays
-
-from django.utils.translation import gettext_lazy as _
 import calendar
+
+from django.contrib import admin
+from django.utils.translation import gettext_lazy as _
+
+from .models import AvailableDays, PublicHolidays, Vacation
 
 
 class MonthFilter(admin.SimpleListFilter):
