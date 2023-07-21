@@ -55,3 +55,5 @@ class AvailableDays(models.Model):
 
     class Meta:
         verbose_name_plural = "Available days"
+
+

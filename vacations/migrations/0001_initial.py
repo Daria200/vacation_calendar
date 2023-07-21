@@ -73,7 +73,7 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name="AvailableDays",
+            name="ExtraDays",
             fields=[
                 (
                     "id",
