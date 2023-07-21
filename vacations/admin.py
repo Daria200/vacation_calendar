@@ -2,6 +2,21 @@ from django.contrib import admin
 
 from .models import Vacation, PublicHolidays, AvailableDays
 
+from django.utils.translation import gettext_lazy as _
+import calendar
+
+
+class MonthFilter(admin.SimpleListFilter):
+    title = _("Month")
+    parameter_name = "month"
+
+    def lookups(self, request, model_admin):
+        return [(str(i), calendar.month_name[i]) for i in range(1, 13)]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(date__month=int(self.value()))
+
 
 class PublicHolidaysAdmin(admin.ModelAdmin):
     list_display = ["city", "date"]
@@ -20,8 +35,9 @@ class VacationAdmin(admin.ModelAdmin):
     search_fields = ["employee__user__last_name", "employee__user__first_name"]
 
     list_filter = [
-        "date",
+        "type",
         "employee__user__last_name",
+        MonthFilter,
     ]
     list_per_page = 30
 
