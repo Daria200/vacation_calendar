@@ -22,7 +22,8 @@
         <div class="right col-4 d-flex justify-content-end">
           <!-- <a href="../logout.html" class="logout-btn">Log out</a> -->
           <div class="container">
-            <a href="../logout.html" class="logout-btn btn btn-secondary btn-block col-md-6">Log out</a>
+            <!-- TODO: clear cookies after clicking log out -->
+            <a href="{% url 'logout' %}" class="logout-btn btn btn-secondary btn-block col-md-6">Log out</a>
          </div>
         </div>
       </div>

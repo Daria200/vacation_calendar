@@ -52,11 +52,13 @@ class AvailableDays(models.Model):
     allotted_days = models.IntegerField(default=30)
     transferred_days = models.DecimalField(default=0, max_digits=2, decimal_places=1)
     year = models.IntegerField()
+    
 
     def __str__(self):
         return f"{self.employee} {self.transferred_days}"
 
     class Meta:
         verbose_name_plural = "Available days"
+        unique_together = ["employee", "year"]
 
 

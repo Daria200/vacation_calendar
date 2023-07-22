@@ -1,11 +1,13 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 
 
 def login(request):
-    pass
+    return render(request, "login.html")
+
 
 def register(request):
-    return render(request, 'register.html')
+    return render(request, "register.html")
+
 
 def logout(request):
-    pass
+    return redirect("login")

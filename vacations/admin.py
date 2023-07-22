@@ -52,7 +52,7 @@ class VacationAdmin(admin.ModelAdmin):
 
 
 class AvailableDaysAdmin(admin.ModelAdmin):
-    list_display =["employee_name", "employee_surname", 'transferred_days', 'year']
+    list_display =["employee_name", "employee_surname",'year','allotted_days', 'transferred_days']
     list_filter = ["employee__user__last_name",'year']
     search_fields = ["employee__user__last_name", "employee__user__first_name"]
     list_display_links = ["employee_name", "employee_surname"]
