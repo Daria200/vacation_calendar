@@ -7,4 +7,5 @@ urlpatterns = [
     path("", include("calendarapp.urls")),
     path("admin/", admin.site.urls),
     path("", include("vacations.urls")),
+    path("", include("employees.urls")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

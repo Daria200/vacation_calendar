@@ -1,6 +1,6 @@
+from django.conf import settings
 from django.contrib import admin
 from django.db import models
-from django.conf import settings
 
 
 class Employee(models.Model):

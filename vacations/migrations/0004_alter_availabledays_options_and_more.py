@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterModelOptions(
-            name="availabledays",
+            name="extradays",
             options={"verbose_name_plural": "Extra days"},
         ),
         migrations.AlterModelOptions(

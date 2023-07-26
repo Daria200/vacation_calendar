@@ -1,6 +1,5 @@
-from pathlib import Path
-
 import os
+from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,7 +25,6 @@ ALLOWED_HOSTS = []
 # Vacation app tracks vacation days for each employee
 
 INSTALLED_APPS = [
-    'django_light',
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -35,7 +33,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "employees",
     "calendarapp",
-    "vacations"
+    "vacations",
 ]
 
 MIDDLEWARE = [
