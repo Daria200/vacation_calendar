@@ -1,6 +1,6 @@
 from django.db import models
 
-from employees.models import Employee
+from employees.models import Employee, CITY_CHOICES
 
 
 class Vacation(models.Model):
@@ -28,13 +28,6 @@ class Vacation(models.Model):
 
 
 class PublicHolidays(models.Model):
-    CITY_CHOICES = (
-        (0, "Bonn"),
-        (1, "Hamburg"),
-        (2, "Frankfurt"),
-        (3, "Munich"),
-    )
-
     city = models.IntegerField(choices=CITY_CHOICES)
     date = models.DateField()
 
@@ -52,7 +45,6 @@ class AvailableDays(models.Model):
     allotted_days = models.IntegerField(default=30)
     transferred_days = models.DecimalField(default=0, max_digits=2, decimal_places=1)
     year = models.IntegerField()
-    
 
     def __str__(self):
         return f"{self.employee} {self.transferred_days}"
@@ -60,5 +52,3 @@ class AvailableDays(models.Model):
     class Meta:
         verbose_name_plural = "Available days"
         unique_together = ["employee", "year"]
-
-
