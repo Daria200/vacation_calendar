@@ -25,7 +25,6 @@ ALLOWED_HOSTS = []
 # Vacation app tracks vacation days for each employee
 
 INSTALLED_APPS = [
-    "django_light",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
