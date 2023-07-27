@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Employee
+from .models import Employee, City, GERMAN_STATES
 
 
 class EmployeeAdmin(admin.ModelAdmin):
@@ -25,4 +25,11 @@ class EmployeeAdmin(admin.ModelAdmin):
     surname.short_description = "Last Name"
 
 
+class CityAdmin(admin.ModelAdmin):
+    list_display = ["name", "state"]
+    list_filter = ["state"]
+    search_fields = ["name", "state"]
+
+
 admin.site.register(Employee, EmployeeAdmin)
+admin.site.register(City, CityAdmin)

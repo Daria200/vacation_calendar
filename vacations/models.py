@@ -1,6 +1,7 @@
+import datetime
 from django.db import models
 
-from employees.models import Employee, CITY_CHOICES
+from employees.models import Employee, City
 
 
 class Vacation(models.Model):
@@ -28,12 +29,12 @@ class Vacation(models.Model):
 
 
 class PublicHolidays(models.Model):
-    city = models.IntegerField(choices=CITY_CHOICES)
     date = models.DateField()
+    name = models.CharField(max_length=100, null=True, blank=True)
+    cities = models.ManyToManyField(City)  # Change 'states' to 'cities'
 
     def __str__(self):
-        city_display = dict(self.CITY_CHOICES).get(self.city)
-        return f"{city_display} {self.date}"
+        return f"{self.name} - {', '.join(str(city) for city in self.cities.all())}"
 
     class Meta:
         verbose_name_plural = "Public holidays"
@@ -44,7 +45,7 @@ class AvailableDays(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     allotted_days = models.IntegerField(default=30)
     transferred_days = models.DecimalField(default=0, max_digits=2, decimal_places=1)
-    year = models.IntegerField()
+    year = models.IntegerField(default=datetime.datetime.now().year, editable=True)
 
     def __str__(self):
         return f"{self.employee} {self.transferred_days}"
