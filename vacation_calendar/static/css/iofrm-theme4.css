@@ -136,12 +136,12 @@ body {
 }
 
 .form-content .page-links a.active:after {
-  background-color: #0092fe;
+  background-color: #ffb545;
 }
 
 .form-content .page-links a:hover:after,
 .form-content .page-links a:focus:after {
-  background-color: #0092fe;
+  background-color: #ffdb45;
 }
 
 .form-content input,
@@ -243,7 +243,7 @@ body {
 
 .form-content .form-button .ibtn {
   background-color: #ffdb45;
-  color: #fff;
+  color: black;
   -webkit-box-shadow: 0 0 0 rgba(80, 182, 255, 0.31);
   box-shadow: 0 0 0 rgba(80, 182, 255, 0.31);
 }
@@ -251,7 +251,7 @@ body {
 .form-content .form-button .ibtn:hover,
 .form-content .form-button .ibtn:focus {
   background-color: #ffb545;
-  color: #fff;
+  color: black;
   -webkit-box-shadow: 0 5px 6px rgba(80, 182, 255, 0.31);
   box-shadow: 0 5px 6px rgba(80, 182, 255, 0.31);
 }

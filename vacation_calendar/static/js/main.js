@@ -25,3 +25,7 @@
 	$("[data-toggle='tooltip']").tooltip();
 
 })();
+
+setTimeout(function(){
+	$('#message').fadeOut('slow');
+}, 4000)
