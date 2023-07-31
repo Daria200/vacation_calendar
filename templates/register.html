@@ -47,14 +47,14 @@
                 <input
                   class="form-control"
                   type="text"
-                  name="name"
+                  name="first_name"
                   placeholder="Name"
                   required
                 />
                 <input
                   class="form-control"
                   type="text"
-                  name="surname"
+                  name="last_name"
                   placeholder="Surname"
                   required
                 />
@@ -73,25 +73,42 @@
                   placeholder="Password"
                   required
                 />
-                <div class="col-md-12 mb-2" style="padding: 0">
+                <input
+                  class="form-control"
+                  type="password"
+                  name="password2"
+                  placeholder="Password"
+                  required
+                />
+
+                <input type="checkbox" />Show Password
+                <p>
+                  <input type="checkbox" name="has_consented" id="checkbox" />
+                  <label for="checkbox">I confirm...</label>
+                </p>
+                <!-- TODO: make it required -->
+                <div class="col-md-12 mb-2" style="padding: 0" required>
                   <label class="sr-only">City</label>
-                  <select name="City" class="form-control" required>
+                  <select id="city" name="city" class="form-control" required>
                     <option selected="true" disabled="disabled">
                       Your City
                     </option>
-                    <option value="Frankfurt">Frankfurt</option>
-                    <option value="Bonn">Bonn</option>
-                    <option value="Munich">Munich</option>
-                    <option value="Hamburg">Hamburg</option>
+                    {% for city in cities %}
+                    <option value="{{ city.name }}">{{ city.name }}</option>
+                    {% endfor %}
                   </select>
                 </div>
                 <div class="col-md-12 mb-2" style="padding: 0">
                   <label class="sr-only">Manager</label>
-                  <select name="Manager" class="form-control" required>
+                  <select name="manager" class="form-control" required>
                     <option selected="true" disabled="disabled">
                       Your Manager
                     </option>
-                    <option value="Abdulkerim">Abdulkerim Corbo</option>
+                    {% for manager in managers %}
+                    <option value="{{ manager.user.id }}">
+                      {{ manager.user.first_name }} {{ manager.user.last_name }}
+                    </option>
+                    {% endfor %}
                   </select>
                 </div>
                 <div class="form-button">

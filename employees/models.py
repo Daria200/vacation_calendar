@@ -3,14 +3,6 @@ from django.contrib import admin
 from django.db import models
 
 
-CITY_CHOICES = (
-    (0, "Bonn"),
-    (1, "Hamburg"),
-    (2, "Frankfurt"),
-    (3, "Munich"),
-)
-
-
 GERMAN_STATES = (
     (0, "Baden-Württemberg"),
     (1, "Bavaria (Bayern)"),
