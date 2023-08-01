@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Employee, City, GERMAN_STATES
+from .models import Employee, City
 
 
 class EmployeeAdmin(admin.ModelAdmin):

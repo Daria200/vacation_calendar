@@ -10,7 +10,6 @@ def register(request):
     cities = City.objects.all()
 
     if request.method == "POST":
-        print(request.POST)
         # Get form values
         first_name = request.POST["first_name"]
         last_name = request.POST["last_name"]
@@ -59,7 +58,19 @@ def register(request):
 
 def login(request):
     if request.method == "POST":
-        print("login")
+        email = request.POST["email"]
+        password = request.POST["password"]
+        print(email, password)
+
+        user = auth.authenticate(email=email, password=password)
+        print(user)
+        if user is not None:
+            auth.login(request, user)
+            # ­TODO:add messages
+            return redirect("dashboard")
+        else:
+            messages.error(request, "Invalid credentials")
+            return redirect("login")
     return render(request, "login.html")
 
 

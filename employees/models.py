@@ -1,7 +1,5 @@
 from django.conf import settings
-from django.contrib import admin
 from django.db import models
-
 
 GERMAN_STATES = (
     (0, "Baden-Württemberg"),
