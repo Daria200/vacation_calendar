@@ -1,7 +1,12 @@
-{% extends 'base.html' %} {% load static %} {% block content %} 
+{% extends 'base.html' %}
+{% load static %}
+
 {% block extracss %}
-<link href="{% static 'calender/main.css' %}" rel="stylesheet" />
+<link rel="stylesheet" href="{% static 'calendar/main.css' %}" />
 {% endblock extracss %}
+
+{% block content %} 
+
 <div class="main">
   <div class="main-top">
     <ul>
@@ -70,13 +75,13 @@
     </div>
   </div>
 </div>
-{% endblock content %} {% block extrascripts %}
-<script src="main.js"></script>
+{% endblock content %}
+
+{% block extrascripts %}
+<script src="{% static 'js/main-calendar.js' %}"></script>
 <script>
-  console.log('hi')
   document.addEventListener("DOMContentLoaded", function () {
     var calendarEl = document.getElementById("calendar");
-    console.log(calendarEl)
     var today = new Date();
 
     var calendar = new FullCalendar.Calendar(calendarEl, {
@@ -128,12 +133,4 @@
   src = "https://kit.fontawesome.com/65d2e5b72d.js";
   crossorigin = "anonymous";
 </script>
-<script src="js/js/jquery-3.3.1.min.js"></script>
-<script src="js/popper.js"></script>
-<script src="js/js/bootstrap.min.js"></script>
-<script src="js/main.js"></script>
-<script
-  src="https://kit.fontawesome.com/65d2e5b72d.js"
-  crossorigin="anonymous"
-></script>
 {% endblock extrascripts %}
