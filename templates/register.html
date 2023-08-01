@@ -80,30 +80,17 @@
                   placeholder="Password"
                   required
                 />
-
-                <input type="checkbox" />Show Password
-                <p>
-                  <input type="checkbox" name="has_consented" id="checkbox" />
-                  <label for="checkbox">I confirm...</label>
-                </p>
-                <!-- TODO: make it required -->
                 <div class="col-md-12 mb-2" style="padding: 0" required>
-                  <label class="sr-only">City</label>
+                  <label class="">Choose your city</label>
                   <select id="city" name="city" class="form-control" required>
-                    <option selected="true" disabled="disabled">
-                      Your City
-                    </option>
                     {% for city in cities %}
                     <option value="{{ city.name }}">{{ city.name }}</option>
                     {% endfor %}
                   </select>
                 </div>
                 <div class="col-md-12 mb-2" style="padding: 0">
-                  <label class="sr-only">Manager</label>
+                  <label class="">Choose your manager</label>
                   <select name="manager" class="form-control" required>
-                    <option selected="true" disabled="disabled">
-                      Your Manager
-                    </option>
                     {% for manager in managers %}
                     <option value="{{ manager.user.id }}">
                       {{ manager.user.first_name }} {{ manager.user.last_name }}
