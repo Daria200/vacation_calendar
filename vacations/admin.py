@@ -19,10 +19,13 @@ class MonthFilter(admin.SimpleListFilter):
 
 
 class PublicHolidaysAdmin(admin.ModelAdmin):
-    list_display = ["date", "name", "get_cities"]
-    filter_horizontal = ["cities"]
+    list_display = ["date", "name", "in_cities"]
 
-    def get_cities(self, day):
+    list_filter = [
+        "cities",
+    ]
+
+    def in_cities(self, day):
         return ",\n".join([city.name for city in day.cities.all()])
 
 
@@ -71,9 +74,6 @@ class AvailableDaysAdmin(admin.ModelAdmin):
 
     def employee_surname(self, obj):
         return obj.employee.user.last_name
-
-    employee_name.short_description = "First Name"
-    employee_surname.short_description = "Last Name"
 
 
 admin.site.register(Vacation, VacationAdmin)

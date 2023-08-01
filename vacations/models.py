@@ -31,10 +31,9 @@ class Vacation(models.Model):
 class PublicHolidays(models.Model):
     date = models.DateField()
     name = models.CharField(max_length=100, null=True, blank=True)
-    cities = models.ManyToManyField(City)  # Change 'states' to 'cities'
+    cities = models.ManyToManyField(City)
 
-    def __str__(self):
-        return f"{self.name} - {', '.join(str(city) for city in self.cities.all())}"
+    # TODO: Some holidays repeat every year, need to add a button: every year
 
     class Meta:
         verbose_name_plural = "Public holidays"

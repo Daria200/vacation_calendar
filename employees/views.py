@@ -43,6 +43,8 @@ def register(request):
                     city=city,
                     is_manager=False,
                 )
+                user.save()
+                employee.save()
                 # login after register
                 auth.login(request, user)
                 # TODO:add message : SUUCCESS
@@ -56,7 +58,7 @@ def register(request):
 
 
 def login(request):
-    if request.mothed == "POST":
+    if request.method == "POST":
         print("login")
     return render(request, "login.html")
 
