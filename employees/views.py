@@ -60,10 +60,11 @@ def login(request):
     if request.method == "POST":
         email = request.POST["email"]
         password = request.POST["password"]
-        print(email, password)
+        user = User.objects.get(email=email)
+        username = user.username
 
-        user = auth.authenticate(email=email, password=password)
-        print(user)
+        user = auth.authenticate(username=username, password=password)
+
         if user is not None:
             auth.login(request, user)
             # ­TODO:add messages
