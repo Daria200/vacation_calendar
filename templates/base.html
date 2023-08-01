@@ -16,9 +16,15 @@
     <!-- Top Bar -->
 
     <div class="topbar container row justify-content-between">
-        <div class="left col-4">
-          <span class="nav-user-name "><h2>Hello, User</h2></span>
-        </div>
+      <div class="left col-4">
+        <span class="nav-user-name">
+          {% if user.is_authenticated %}
+            <h2>Hello, {{ user.first_name }}</h2>
+          {% else %}
+            <h2>Hello, Guest</h2>
+          {% endif %}
+        </span>
+      </div>
         <div class="right col-4 d-flex justify-content-end">
           <!-- <a href="../logout.html" class="logout-btn">Log out</a> -->
           <div class="container">

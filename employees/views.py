@@ -65,6 +65,7 @@ def login(request):
 
         user = auth.authenticate(username=username, password=password)
 
+        # TODO: make emails unique and required
         if user is not None:
             auth.login(request, user)
             # ­TODO:add messages
