@@ -1,9 +1,25 @@
+from django import forms
 from django.contrib import admin
 
-from .models import Employee, City
+from .models import City, Employee
+
+
+class EmployeeAdminForm(forms.ModelForm):
+    class Meta:
+        model = Employee
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super(EmployeeAdminForm, self).__init__(*args, **kwargs)
+        # Customize the way the user field is displayed in the admin form
+        self.fields["user"].label_from_instance = self.get_user_display_name
+
+    def get_user_display_name(self, user):
+        return f"{user.first_name} {user.last_name}"
 
 
 class EmployeeAdmin(admin.ModelAdmin):
+    form = EmployeeAdminForm
     list_display = ["name", "surname", "city", "manager", "is_manager"]
     list_display_links = [
         "name",
