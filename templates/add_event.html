@@ -3,7 +3,8 @@
   <div class="row text-center">
     <div class="col-md-10">
       <!-- #TODO: -->
-      <form>
+      <form action="{% url 'add_event'  %}" method="POST">
+        {% csrf_token %}
         <div class="form-group row">
           <label for="start_date" class="col-sm-2 col-form-label"
             >Start Date</label
@@ -11,7 +12,7 @@
           <div class="col-sm-4">
             <div class="form-group">
               <div class="input-group date" id="startdate">
-                <input type="date" class="form-control" />
+                <input type="date" class="form-control" name="startdate"/>
                 <span class="input-group-addon">
                   <span class="glyphicon glyphicon-calendar"></span>
                 </span>

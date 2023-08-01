@@ -20,8 +20,8 @@
         <div class="tile row">
           <div class="col-md-3">
             <div id="external-events">
-              <h4 class="mb-4">Running Events</h4>
-              <p>No Running Events Found</p>
+              <h4 class="mb-4">Events</h4>
+              <p>No Events Found</p>
               <!-- TODO: make it work -->
               <!-- {% for event in events_month %}
               <div class="fc-event">
@@ -73,8 +73,10 @@
 {% endblock content %} {% block extrascripts %}
 <script src="main.js"></script>
 <script>
+  console.log('hi')
   document.addEventListener("DOMContentLoaded", function () {
     var calendarEl = document.getElementById("calendar");
+    console.log(calendarEl)
     var today = new Date();
 
     var calendar = new FullCalendar.Calendar(calendarEl, {
