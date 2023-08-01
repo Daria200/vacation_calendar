@@ -32,6 +32,7 @@ class PublicHolidays(models.Model):
     date = models.DateField()
     name = models.CharField(max_length=100, null=True, blank=True)
     cities = models.ManyToManyField(City)
+    every_year = models.BooleanField(default=False)
 
     # TODO: Some holidays repeat every year, need to add a button: every year
 

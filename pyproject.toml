@@ -8,10 +8,10 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-django = "^4.2.2"
 django-non-dark-admin = "^2.0.2"
 pytest = "^7.4.0"
 selenium = "^4.10.0"
+django = "^4.2.3"
 
 
 [tool.poetry.group.dev.dependencies]
