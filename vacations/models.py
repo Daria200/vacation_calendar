@@ -6,13 +6,13 @@ from employees.models import Employee, City
 
 class Vacation(models.Model):
     TYPE_CHOICES = ((1, "Vacation"), (2, "Special leave"))
-
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     date = models.DateField()
+
     # An employee can have half a day off, by default it a full day
     # A full day is 1; a half day is 0.5
     FULL_DAY_CHOICES = (
-        (1, "1.0"),
+        (1.0, "1.0"),
         (0.5, "0.5"),
     )
 
@@ -22,6 +22,7 @@ class Vacation(models.Model):
         decimal_places=1,
         choices=FULL_DAY_CHOICES,
     )
+    approved = models.BooleanField(default=False)
     type = models.IntegerField(choices=TYPE_CHOICES, default=1)
     # Description is needed only if it's a special leave
     # Is disabled when it's a regular vacation

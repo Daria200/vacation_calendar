@@ -5,6 +5,8 @@
       <!-- #TODO: -->
       <div id="alert-container"></div>
       
+      <!-- Alerts -->
+      {% include '_alerts.html' %}
       <form id="vacation-form" action="{% url 'vacation_request'  %}" method="POST">
         {% csrf_token %}
         <div class="alert-container"></div>
@@ -46,7 +48,7 @@
               type="radio"
               name="vacation_type"
               id="regular_vacation"
-              value="vacation"
+              value="1"
               required
             />
             <label class="form-check-label" for="inlineRadio1">Vacation</label>
@@ -57,7 +59,7 @@
               type="radio"
               name="vacation_type"
               id="Other"
-              value="other"
+              value="2"
             />
             <label class="form-check-label" for="inlineRadio2"
               >Other/Sonderurlaud</label
@@ -74,7 +76,7 @@
               type="radio"
               name="length"
               id="length"
-              value="full"
+              value="1"
               required
             />
             <label class="form-check-label" for="inlineRadio1">Full</label>
@@ -85,7 +87,7 @@
               type="radio"
               name="length"
               id="half"
-              value="half"
+              value="0.5"
             />
             <label class="form-check-label" for="inlineRadio2"
               >Half a day</label
