@@ -22,6 +22,7 @@ ALLOWED_HOSTS = []
 # Employees app stores data about the employes, manages employee profiles, authentication, and permissions
 # Calendarapp provides the calendar functionality, allowing employees to view their vacation days
 # Vacation app tracks vacation days for each employee
+# Manager app displays views for managers
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -34,6 +35,7 @@ INSTALLED_APPS = [
     "calendarapp",
     "vacations",
     'manager',
+    
 ]
 
 MIDDLEWARE = [

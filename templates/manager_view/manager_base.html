@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manager View</title>
+<link rel="stylesheet" href="{% static 'css/manager.css' %}" /> 
+</head>
+<body>
+
+  <div class="header">
+    <a class="logo" href="{% url 'calendar' %}">
+      <span>
+        <img
+          src="{% static 'images/systemverification_logo.png' %}"
+          alt="logo-large"
+          class="logo"
+        />
+      </span>
+    </a>   
+    <div class="header-right">
+      <a 
+      {% if '/manager/hr_view' == request.path %}
+        class="active"
+      {% else %
+        class=""}    
+      {% endif %}
+      href="{% url 'hr_view' %}">HR view</a>
+
+      <a 
+      {% if '/manager/manager_view_monthly' == request.path %}
+        class="active"
+      {% else %
+        class=""}    
+      {% endif %}
+      href="{% url 'manager_view_monthly' %}">Monthly</a>
+
+      <a
+      {% if '/manager/manager_view_total' == request.path %}
+        class="active"
+      {% else %
+        class=""}    
+      {% endif %} 
+      href="{% url 'manager_view_total' %}">Total</a>
+
+      <a 
+      {% if '/manager/vacation_requests' == request.path %}
+        class="active"
+      {% else %
+        class=""}    
+      {% endif %} 
+      href="{% url 'vacation_requests' %}">Vacation requests</a>
+
+      <a 
+      {% if '/manager/transfer_days_requests' == request.path %}
+        class="active"
+      {% else %
+        class=""}    
+      {% endif %} 
+      href="{% url 'transfer_days_requests' %}">Transfer days requests</a>
+
+      <a 
+      {% if '/manager/cancel_days_requests' == request.path %}
+        class="active"
+      {% else %
+        class=""}    
+      {% endif %} 
+      href="{% url 'cancel_days_requests' %}">Cancel days requests</a>
+
+      <!-- TODO: make it work -->
+      <a href="#">log out</a>
+    </div>
+  </div>
+
+    <!-- Main BLock -->
+{% block content %} {% endblock %}
+
+</body>
+</html>
