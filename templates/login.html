@@ -1,78 +1,43 @@
+{% extends 'register_login_base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login</title>
-    <link rel="stylesheet" href="{% static 'css/bootstrap2.min.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/fontawesome-all.min.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/iofrm-style.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/iofrm-theme4.css' %}" />
-  </head>
-  <body>
-    <div class="form-body">
-      <div class="website-logo">
-          <div class="logo">
-            <img
-              src="{% static 'images/systemverification_logo_black.png' %}"
-              alt=""
-            />
-          </div>
-        </a>
-      </div>
-      <div class="row">
-        <div class="img-holder">
-          <div class="bg"></div>
-          <div class="info-holder">
-            <img src="{% static 'images/graphic1.svg' %}" alt="" />
-          </div>
-        </div>
-        <div class="form-holder">
-          <div class="form-content">
-            <div class="form-items">
-              <h3>System Verification Vacation App</h3>
-              <p>Login</p>
-              <div class="page-links">
-                <a href="{% url 'login' %}" class="active">Login</a
-                ><a href="{% url 'register' %}">Register</a>
-              </div>
-               <!-- Alerts -->
-               {% include '_alerts.html' %}
-              <form action="{% url 'login'  %}" method="POST">
-                {% csrf_token %}
-                <input
-                  class="form-control"
-                  type="text"
-                  name="email"
-                  placeholder="E-mail Address"
-                  required
-                />
-                <input
-                  class="form-control"
-                  type="password"
-                  name="password"
-                  placeholder="Password"
-                  required
-                />
-                <div class="form-button">
-                  <button id="submit" type="submit" class="ibtn">Login</button>
-                  <a href="forget4.html">Forget password?</a>
+{% block content %} 
+  <div class="form-holder">
+            <div class="form-content">
+              <div class="form-items">
+                <h3>System Verification Vacation App</h3>
+                <p>Login</p>
+                <div class="page-links">
+                  <a href="{% url 'login' %}" class="active">Login</a
+                  ><a href="{% url 'register' %}">Register</a>
                 </div>
-              </form>
-              <div class="other-links">
-                <span>Or login with</span><a href="#">Facebook</a
-                ><a href="#">Google</a><a href="#">Linkedin</a>
+                <!-- Alerts -->
+                {% include '_alerts.html' %}
+                <form action="{% url 'login'  %}" method="POST">
+                  {% csrf_token %}
+                  <input
+                    class="form-control"
+                    type="text"
+                    name="email"
+                    placeholder="E-mail Address"
+                    required
+                  />
+                  <input
+                    class="form-control"
+                    type="password"
+                    name="password"
+                    placeholder="Password"
+                    required
+                  />
+                  <div class="form-button">
+                    <button id="submit" type="submit" class="ibtn">Login</button>
+                    <a href="forget4.html">Forget password?</a>
+                  </div>
+                </form>
+                <div class="other-links">
+                  <span>Or login with</span><a href="#">Facebook</a
+                  ><a href="#">Google</a><a href="#">Linkedin</a>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <script src="{% static 'js/popper-login.min.js' %}"></script>
-    <script src="{% static 'js/jquery.min.js' %}"></script>
-    <script src="{% static 'js/bootstrap.min.js' %}"></script>
-    <script src="{% static 'js/main-login.js' %}"></script>
-    <script src="{% static 'js/main.js' %}"></script>
-  </body>
-</html>
+  </div>
+{% endblock %}
