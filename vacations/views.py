@@ -11,10 +11,10 @@ def vacation_request(request):
         # enddate = request.POST["end_date"]
         # print(start_date,enddate )
         return redirect(request, "vacation_request")
-    return render(request, "vacation_request.html")
+    return render(request, "employee_view/vacation_request.html")
 
 def transfer_days_request(request):
-    return render(request, 'transfer_days_request.html')
+    return render(request, 'employee_view/transfer_days_request.html')
 
 def cancel_vacation_days(request):
-    return render(request, 'cancel_vacation_days.html')
+    return render(request, 'employee_view/cancel_vacation_days.html')

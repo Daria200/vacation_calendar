@@ -53,7 +53,7 @@ def register(request):
             return redirect("register")
     else:
         context = {"managers": managers, "cities": cities}
-        return render(request, "register.html", context)
+        return render(request, "employee_view/register.html", context)
 
 
 def login(request):
@@ -73,7 +73,7 @@ def login(request):
         else:
             messages.error(request, "Invalid credentials")
             return redirect("login")
-    return render(request, "login.html")
+    return render(request, "employee_view/login.html")
 
 
 def logout(request):

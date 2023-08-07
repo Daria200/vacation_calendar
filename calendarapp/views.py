@@ -6,7 +6,7 @@ from employees.models import Employee, City
 # Click a cell and add a request
 # add a short list on the left side
 def calendar(request):
-    return render(request, "calendar.html")
+    return render(request, "employee_view/calendar.html")
 
 
 # TODO:redo
@@ -20,4 +20,4 @@ def employee_calendar(request):
 # Employees can see their progress and which days they have taken
 # they will see how many days are left
 def dashboard(request):
-    return render(request, "dashboard.html")
+    return render(request, "employee_view/dashboard.html")
