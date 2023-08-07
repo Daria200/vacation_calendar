@@ -47,7 +47,7 @@ def register(request):
                 # login after register
                 auth.login(request, user)
                 # TODO:add message : SUUCCESS
-                return redirect("dashboard")
+                return redirect("calendar")
         else:
             messages.error(request, "Passwords do not match")
             return redirect("register")
@@ -69,7 +69,7 @@ def login(request):
         if user is not None:
             auth.login(request, user)
             # ­TODO:add messages
-            return redirect("dashboard")
+            return redirect("calendar")
         else:
             messages.error(request, "Invalid credentials")
             return redirect("login")

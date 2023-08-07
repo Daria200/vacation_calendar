@@ -34,13 +34,10 @@ class PublicHolidays(models.Model):
     cities = models.ManyToManyField(City)
     every_year = models.BooleanField(default=False)
 
-    # TODO: Some holidays repeat every year, need to add a button: every year
-
     class Meta:
         verbose_name_plural = "Public holidays"
 
 
-# TODO: it does not work
 class AvailableDays(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     allotted_days = models.IntegerField(default=30)
@@ -53,3 +50,16 @@ class AvailableDays(models.Model):
     class Meta:
         verbose_name_plural = "Available days"
         unique_together = ["employee", "year"]
+
+class TransferDaysRequest(models.Model):
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    description = models.TextField()
+
+
+class DeleteDaysRequest(models.Model):
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    description = models.TextField()

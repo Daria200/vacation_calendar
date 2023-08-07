@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard</title>
+    <title>Your Vacation</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}" /> 
     <link rel="stylesheet" href="{% static 'css/main.css' %}" />
     <link rel="stylesheet" href="{% static 'css/calendar_main.css' %}" />
@@ -41,7 +41,7 @@
     <!-- Left Side -->
     <div class="leftside">
         <div class="logo">
-          <a href="{% url 'dashboard' %}">
+          <a href="{% url 'calendar' %}">
             <span>
               <img
                 src="{% static 'images/systemverification_logo.png' %}"
@@ -52,7 +52,6 @@
           </a>
         </div>
         <div class="leftside-menu">
-          <!-- TODO: works only for dashboard -->
           <ul>
             <li 
               {% if '/' == request.path %}
@@ -61,33 +60,56 @@
                 class="menu-item"
               {% endif %}
               >
-              <a href="{% url 'dashboard' %}">
-                <i class="fa-solid fa-calendar-days" style="color: #ffffff"></i>Dashboard
-              </a>
-            </li>
-            <li
-            {% if '/add_event' == request.path %}
-              class="menu-item active-link"
-            {% else %}
-              class="menu-item"
-            {% endif %}>
-              <a href="{% url 'add_event' %}">
-                <i class="fa-solid fa-plus" style="color: #ffffff"></i>
-                Add Event
+              <a href="{% url 'calendar' %}">
+                <i class="fa-solid fa-calendar-days" style="color: #ffffff"></i>Calendar
               </a>
             </li>
             <li 
-            {% if '/events' == request.path %}
+            {% if '/dashboard' == request.path %}
               class="menu-item active-link"
             {% else %}
               class="menu-item"
             {% endif %}
             >
-              <a href="{% url 'events' %}">
+              <a href="{% url 'dashboard' %}">
                 <i class="fa-solid fa-eye" style="color: #ffffff"></i>
-                Events
+                Dashboard
               </a>
             </li>
+            <li
+            {% if '/vacation_request' == request.path %}
+              class="menu-item active-link"
+            {% else %}
+              class="menu-item"
+            {% endif %}>
+              <a href="{% url 'vacation_request' %}">
+                <i class="fa-solid fa-plus" style="color: #ffffff"></i>
+                Vacation request
+              </a>
+            </li>
+            <li
+            {% if '/transfer_days_request' == request.path %}
+              class="menu-item active-link"
+            {% else %}
+              class="menu-item"
+            {% endif %}>
+              <a href="{% url 'transfer_days_request' %}">
+                <i class="fa-solid fa-plus" style="color: #ffffff"></i>
+                Transfer days
+              </a>
+            </li>
+            <li
+            {% if '/cancel_vacation_days' == request.path %}
+              class="menu-item active-link"
+            {% else %}
+              class="menu-item"
+            {% endif %}>
+              <a href="{% url 'cancel_vacation_days' %}">
+                <i class="fa-solid fa-trash-can" style="color: #ffffff"></i>
+                Cancel vacation days
+              </a>
+            </li>
+            <!-- TODO: needs to be remade -->
             <li 
             {% if '/employee_calendar' == request.path %}
               class="menu-item active-link"
