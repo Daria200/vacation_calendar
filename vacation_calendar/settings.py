@@ -21,7 +21,6 @@ ALLOWED_HOSTS = []
 
 # Employees app stores data about the employes, manages employee profiles, authentication, and permissions
 # Calendarapp provides the calendar functionality, allowing employees to view their vacation days
-# and managers to see which employee took which days
 # Vacation app tracks vacation days for each employee
 
 INSTALLED_APPS = [
@@ -34,6 +33,7 @@ INSTALLED_APPS = [
     "employees",
     "calendarapp",
     "vacations",
+    'manager',
 ]
 
 MIDDLEWARE = [

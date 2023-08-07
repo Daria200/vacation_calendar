@@ -110,16 +110,10 @@
               </a>
             </li>
             <!-- TODO: needs to be remade -->
-            <li 
-            {% if '/employee_calendar' == request.path %}
-              class="menu-item active-link"
-            {% else %}
-              class="menu-item"
-            {% endif %}
-            >
-              <a href="{% url 'employee_calendar' %}">
+            <li class="menu-item">
+              <a href="{% url 'hr_view' %}">
                 <i class="fa-solid fa-eye" style="color: #ffffff"></i>
-                View Employees
+                Manager View
               </a>
             </li>
           </ul>
