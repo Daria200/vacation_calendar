@@ -1,5 +1,6 @@
 from django.contrib import messages, auth
 from django.contrib.auth.models import User
+from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .models import City, Employee
@@ -29,24 +30,21 @@ def register(request):
                 messages.error(request, "User with this email is already registered")
                 return redirect("register")
             else:
-                # TODO: create the user and employee in an atomic transaction
                 # TODO:what should be the username?
-                user = User.objects.create_user(
-                    username=email,
-                    password=password,
-                    email=email,
-                    first_name=first_name,
-                    last_name=last_name,
-                )
-                employee = Employee.objects.create(
-                    user=user,
-                    manager=manager,
-                    city=city,
-                    is_manager=False,
-                )
-                # TODO: not necessary to save after creating
-                user.save()
-                employee.save()
+                with transaction.atomic():
+                    user = User.objects.create_user(
+                        username=email,
+                        password=password,
+                        email=email,
+                        first_name=first_name,
+                        last_name=last_name,
+                    )
+                    Employee.objects.create(
+                        user=user,
+                        manager=manager,
+                        city=city,
+                        is_manager=False,
+                    )
                 # login after register
                 auth.login(request, user)
                 # TODO:add message : SUUCCESS
