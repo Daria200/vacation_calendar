@@ -7,8 +7,6 @@ from .models import (
     AvailableDays,
     PublicHolidays,
     Vacation,
-    DeleteDaysRequest,
-    TransferDaysRequest,
     Request,
 )
 
@@ -84,30 +82,6 @@ class AvailableDaysAdmin(admin.ModelAdmin):
         return obj.employee.user.last_name
 
 
-class TransferDaysRequestAdmin(admin.ModelAdmin):
-    list_display = ["employee_name", "employee_surname", "start_date", "end_date"]
-    search_fields = ["employee__user__last_name", "employee__user__first_name"]
-    list_display_links = ["employee_name", "employee_surname"]
-
-    def employee_name(self, obj):
-        return obj.employee.user.first_name
-
-    def employee_surname(self, obj):
-        return obj.employee.user.last_name
-
-
-class DeleteDaysRequestAdmin(admin.ModelAdmin):
-    list_display = ["employee_name", "employee_surname", "start_date", "end_date"]
-    search_fields = ["employee__user__last_name", "employee__user__first_name"]
-    list_display_links = ["employee_name", "employee_surname"]
-
-    def employee_name(self, obj):
-        return obj.employee.user.first_name
-
-    def employee_surname(self, obj):
-        return obj.employee.user.last_name
-
-
 class RequestAdmin(admin.ModelAdmin):
     list_display = [
         "employee_name",
@@ -131,6 +105,4 @@ class RequestAdmin(admin.ModelAdmin):
 admin.site.register(Vacation, VacationAdmin)
 admin.site.register(PublicHolidays, PublicHolidaysAdmin)
 admin.site.register(AvailableDays, AvailableDaysAdmin)
-admin.site.register(DeleteDaysRequest, DeleteDaysRequestAdmin)
-admin.site.register(TransferDaysRequest, TransferDaysRequestAdmin)
 admin.site.register(Request, RequestAdmin)
