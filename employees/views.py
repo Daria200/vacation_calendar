@@ -6,6 +6,7 @@ from .models import City, Employee
 
 
 def register(request):
+    # TODO: only run these queries if it's a GET request. Not needed if it's a POST request
     managers = Employee.objects.filter(is_manager=True)
     cities = City.objects.all()
 
@@ -28,6 +29,7 @@ def register(request):
                 messages.error(request, "User with this email is already registered")
                 return redirect("register")
             else:
+                # TODO: create the user and employee in an atomic transaction
                 # TODO:what should be the username?
                 user = User.objects.create_user(
                     username=email,
@@ -42,6 +44,7 @@ def register(request):
                     city=city,
                     is_manager=False,
                 )
+                # TODO: not necessary to save after creating
                 user.save()
                 employee.save()
                 # login after register
