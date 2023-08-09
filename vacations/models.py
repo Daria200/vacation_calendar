@@ -1,7 +1,8 @@
 import datetime
+
 from django.db import models
 
-from employees.models import Employee, City
+from employees.models import City, Employee
 
 
 class Vacation(models.Model):
@@ -27,6 +28,8 @@ class Vacation(models.Model):
     # Description is needed only if it's a special leave
     # Is disabled when it's a regular vacation
     description = models.CharField(max_length=200, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_modified = models.DateTimeField(auto_now=True)
 
 
 class PublicHolidays(models.Model):
@@ -52,15 +55,14 @@ class AvailableDays(models.Model):
         verbose_name_plural = "Available days"
         unique_together = ["employee", "year"]
 
-class TransferDaysRequest(models.Model):
+
+class Request(models.Model):
+    TYPES = ((1, "vacation"), (2, "transfer"), (3, "cancel"))
+
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     start_date = models.DateField()
     end_date = models.DateField()
-    description = models.TextField()
-
-
-class DeleteDaysRequest(models.Model):
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-    start_date = models.DateField()
-    end_date = models.DateField()
-    description = models.TextField()
+    description = models.TextField(max_length=200, null=True, blank=True)
+    request_type = models.IntegerField(choices=TYPES)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_modified = models.DateTimeField(auto_now=True)

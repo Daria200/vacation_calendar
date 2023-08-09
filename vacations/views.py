@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.shortcuts import redirect, render
 
 from employees.models import Employee
-from .models import Vacation, PublicHolidays
+from .models import Vacation, PublicHolidays, Request
 
 
 # Create your views here.
@@ -18,6 +18,9 @@ def vacation_request(request):
     # check if the employee does not exceed the available days
     # Get public holidays, saved_days
     # Calculate the amount of days requested (not weekend, not public holiday, not in the DB)
+
+    # DO NOT FORGET
+
     # Reject if the sum of requested + saved days exceed available days (sum allotted and transferred)
     # Save in bulk
 
@@ -33,7 +36,6 @@ def vacation_request(request):
             vacation_type = request.POST["vacation_type"]
             full_day = float(request.POST["length"])
             description = request.POST.get("description", None)
-            
 
             # Convert the date strings to datetime objects
             start_date = datetime.datetime.strptime(startdate, "%Y-%m-%d").date()
@@ -42,27 +44,23 @@ def vacation_request(request):
             # Calculate the number of days between the start and end dates
             num_days = (end_date - start_date).days + 1
 
-            # Initialize a list to store the workdays for the vacation
-            workdays = []
-            number_of_days=0
-
             # Get Public holidays:
             # Need the city and the year
             employee_city = request.user.employee.city
             current_year = date.today().year
             # Get public holidays for this year
             public_holidays_this_year = PublicHolidays.objects.filter(
-            cities=employee_city,
-            date__year=current_year,
-        )
+                cities=employee_city,
+                date__year=current_year,
+            )
             # Get public holidays that happen every year
             public_holidays_every_year = PublicHolidays.objects.filter(
-            cities=employee_city,
-            every_year=True,
-        )
+                cities=employee_city,
+                every_year=True,
+            )
 
             public_holidays_set = set()
-            
+
             for holiday in public_holidays_this_year:
                 public_holidays_set.add(holiday.date)
 
@@ -71,46 +69,65 @@ def vacation_request(request):
                 current_date = date(current_year, holiday.date.month, holiday.date.day)
                 public_holidays_set.add(current_date)
 
+            # Saved days in the database
+            vacation_days_saved_in_db = Vacation.objects.filter(employee=employee)
 
-            
+            # Create a list of Vacation instances to save in bulk
+            vacation_instances = []
+
             # Exclude weekends (Saturday and Sunday)
             # Loop through each day between the start and end dates
             for i in range(num_days):
                 current_date = start_date + timedelta(days=i)
 
                 # Exclude weekends (Saturday and Sunday) and public holidays
-                if current_date.weekday() not in [5, 6] and current_date not in public_holidays_set:
+                if (
+                    current_date.weekday() not in [5, 6]
+                    and current_date not in public_holidays_set
+                ):
+                    # Check if the record is in the DB
+                    if vacation_days_saved_in_db.filter(date=current_date).exists():
+                        messages.error(request, f"You already requested {current_date}")
+                        break
 
-                    # Check if the current date is already in the database for this employee
-                    is_already_saved = Vacation.objects.filter(
-                        employee=employee,
-                        date=current_date,
-                    ).exists()
-
-                    if not is_already_saved:
-                        # Create a Vacation instance and save it to the database
-                        vacation = Vacation(
-                            employee=employee,
-                            date=current_date,
-                            full_day=full_day,
-                            approved=False,
-                            type=vacation_type,
-                            description=description,
+                    # Create a Vacation instance and save it to the database
+                    else:
+                        vacation_instances.append(
+                            Vacation(
+                                employee=employee,
+                                date=current_date,
+                                full_day=full_day,
+                                approved=False,
+                                type=vacation_type,
+                                description=description,
+                            )
                         )
-                        vacation.save()
-                        number_of_days+=1
-                        workdays.append(current_date)
 
+            # Use bulk_create to save the instances in bulk
 
-            messages.success(request, f'You requested {number_of_days} days')
+            if len(vacation_instances) > 0:
+                Vacation.objects.bulk_create(vacation_instances)
+                messages.success(
+                    request, f"You requested {len(vacation_instances)} days"
+                )
+                vacation_request = Request.objects.create(
+                    employee=employee,
+                    start_date=startdate,
+                    end_date=enddate,
+                    description=description,
+                    request_type=1,
+                )
+                vacation_request.save()
             return redirect("vacation_request")
         else:
             messages.error(request, "You need to log in in order to send requests")
             return redirect("login")
     return render(request, "employee_view/vacation_request.html")
 
+
 def transfer_days_request(request):
-    return render(request, 'employee_view/transfer_days_request.html')
+    return render(request, "employee_view/transfer_days_request.html")
+
 
 def cancel_vacation_days(request):
-    return render(request, 'employee_view/cancel_vacation_days.html')
+    return render(request, "employee_view/cancel_vacation_days.html")

@@ -34,8 +34,7 @@ INSTALLED_APPS = [
     "employees",
     "calendarapp",
     "vacations",
-    'manager',
-    
+    "manager",
 ]
 
 MIDDLEWARE = [
@@ -104,7 +103,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Europe/Berlin"
 
 USE_I18N = True
 
