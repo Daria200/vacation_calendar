@@ -5,8 +5,16 @@ from django.db import models
 from employees.models import City, Employee
 
 
+class BaseModel(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
+
+
 # TODO: rename VacationDay?
-class Vacation(models.Model):
+class Vacation(BaseModel):
     TYPE_CHOICES = ((1, "Vacation"), (2, "Special leave"))
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     date = models.DateField()
@@ -29,11 +37,10 @@ class Vacation(models.Model):
     # Description is needed only if it's a special leave
     # Is disabled when it's a regular vacation
     description = models.CharField(max_length=200, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    last_modified = models.DateTimeField(auto_now=True)
 
 
-class PublicHolidays(models.Model):
+
+class PublicHolidays(BaseModel):
     date = models.DateField()
     name = models.CharField(max_length=100, null=True, blank=True)
     cities = models.ManyToManyField(City)
@@ -44,7 +51,7 @@ class PublicHolidays(models.Model):
 
 
 # TODO: rename AvailableDay. Use singular names, not plural, for model names
-class AvailableDays(models.Model):
+class AvailableDays(BaseModel):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     allotted_days = models.IntegerField(default=30)
     transferred_days = models.DecimalField(default=0, max_digits=2, decimal_places=1)
@@ -59,7 +66,7 @@ class AvailableDays(models.Model):
         unique_together = ["employee", "year"]
 
 
-class Request(models.Model):
+class Request(BaseModel):
     TYPES = ((1, "vacation"), (2, "transfer"), (3, "cancel"))
 
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
@@ -67,5 +74,3 @@ class Request(models.Model):
     end_date = models.DateField()
     description = models.TextField(max_length=200, null=True, blank=True)
     request_type = models.IntegerField(choices=TYPES)
-    created_at = models.DateTimeField(auto_now_add=True)
-    last_modified = models.DateTimeField(auto_now=True)
