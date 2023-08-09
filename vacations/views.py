@@ -3,6 +3,7 @@ import datetime
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.shortcuts import redirect, render
 
 from employees.models import Employee
@@ -53,6 +54,7 @@ def vacation_request(request):
         public_holidays_this_year = PublicHolidays.objects.filter(
             cities=employee_city,
             date__year=current_year,
+            every_year=False,
         )
         # Get public holidays that happen every year
         public_holidays_every_year = PublicHolidays.objects.filter(
@@ -87,38 +89,38 @@ def vacation_request(request):
                 and current_date not in public_holidays_set
             ):
                 # Check if the record is in the DB
+                # TODO: do not use a query to check this. queries in loop == no bueno
                 if vacation_days_saved_in_db.filter(date=current_date).exists():
                     messages.error(request, f"You already requested {current_date}")
                     break
 
-                # Create a Vacation instance and save it to the database
-                else:
-                    vacation_instances.append(
-                        Vacation(
-                            employee=employee,
-                            date=current_date,
-                            full_day=full_day,
-                            approved=False,
-                            type=vacation_type,
-                            description=description,
-                        )
+                # Create a Vacation instance and prepare to save it to the database
+                vacation_instances.append(
+                    Vacation(
+                        employee=employee,
+                        date=current_date,
+                        full_day=full_day,
+                        approved=False,
+                        type=vacation_type,
+                        description=description,
                     )
+                )
 
         # Use bulk_create to save the instances in bulk
 
         if len(vacation_instances) > 0:
-            Vacation.objects.bulk_create(vacation_instances)
+            with transaction.atomic():
+                Vacation.objects.bulk_create(vacation_instances)
+                Request.objects.create(
+                    employee=employee,
+                    start_date=startdate,
+                    end_date=enddate,
+                    description=description,
+                    request_type=1,
+                )
             messages.success(
                 request, f"You requested {len(vacation_instances)} days"
             )
-            vacation_request = Request.objects.create(
-                employee=employee,
-                start_date=startdate,
-                end_date=enddate,
-                description=description,
-                request_type=1,
-            )
-            vacation_request.save()
         return redirect("vacation_request")
 
     return render(request, "employee_view/vacation_request.html")
