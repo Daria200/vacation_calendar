@@ -5,6 +5,7 @@ from django.db import models
 from employees.models import City, Employee
 
 
+# TODO: rename VacationDay?
 class Vacation(models.Model):
     TYPE_CHOICES = ((1, "Vacation"), (2, "Special leave"))
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
@@ -42,10 +43,12 @@ class PublicHolidays(models.Model):
         verbose_name_plural = "Public holidays"
 
 
+# TODO: rename AvailableDay. Use singular names, not plural, for model names
 class AvailableDays(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     allotted_days = models.IntegerField(default=30)
     transferred_days = models.DecimalField(default=0, max_digits=2, decimal_places=1)
+    # TODO: make sure this is the year in which 
     year = models.IntegerField(default=datetime.datetime.now().year, editable=True)
 
     def __str__(self):
