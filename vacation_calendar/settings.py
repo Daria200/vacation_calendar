@@ -21,8 +21,8 @@ ALLOWED_HOSTS = []
 
 # Employees app stores data about the employes, manages employee profiles, authentication, and permissions
 # Calendarapp provides the calendar functionality, allowing employees to view their vacation days
-# and managers to see which employee took which days
 # Vacation app tracks vacation days for each employee
+# Manager app displays views for managers
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "employees",
     "calendarapp",
     "vacations",
+    "manager",
 ]
 
 MIDDLEWARE = [
@@ -102,7 +103,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Europe/Berlin"
 
 USE_I18N = True
 
@@ -116,9 +117,16 @@ USE_TZ = True
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "vacation_calendar/static")]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "vacation_calendar", "static")]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Messages
+from django.contrib.messages import constants as messages
+
+MESSAGE_TAGS = {
+    messages.ERROR: "danger",
+}

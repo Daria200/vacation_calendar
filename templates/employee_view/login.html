@@ -1,0 +1,43 @@
+{% extends 'employee_view/register_login_base.html' %}
+{% load static %}
+{% block content %} 
+  <div class="form-holder">
+            <div class="form-content">
+              <div class="form-items">
+                <h3>System Verification Vacation App</h3>
+                <p>Login</p>
+                <div class="page-links">
+                  <a href="{% url 'login' %}" class="active">Login</a
+                  ><a href="{% url 'register' %}">Register</a>
+                </div>
+                <!-- Alerts -->
+                {% include '_alerts.html' %}
+                <form action="{% url 'login'  %}" method="POST">
+                  {% csrf_token %}
+                  <input
+                    class="form-control"
+                    type="text"
+                    name="email"
+                    placeholder="E-mail Address"
+                    required
+                  />
+                  <input
+                    class="form-control"
+                    type="password"
+                    name="password"
+                    placeholder="Password"
+                    required
+                  />
+                  <div class="form-button">
+                    <button id="submit" type="submit" class="ibtn">Login</button>
+                    <a href="forget4.html">Forget password?</a>
+                  </div>
+                </form>
+                <div class="other-links">
+                  <span>Or login with</span><a href="#">Facebook</a
+                  ><a href="#">Google</a><a href="#">Linkedin</a>
+                </div>
+              </div>
+            </div>
+  </div>
+{% endblock %}

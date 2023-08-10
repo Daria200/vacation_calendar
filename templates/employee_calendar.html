@@ -1,9 +1,12 @@
-{% extends 'base.html' %} {% block content %}
+{% extends 'employee_view/base.html' %} 
+{% block content %}
 
 <div class="container">
   <div class="row text-center">
     <div class="col-md-10">
       <!-- #TODO: -->
+      <!-- TODO: needs to be renamed -->
+      <!-- this is going to be a table -->
       <form action="search.html">
         <!-- Form Row 1 -->
         <div class="form-row">
@@ -23,10 +26,9 @@
               <option selected="true" disabled="disabled">
                 Choose City
               </option>
-              <option value="Frankfurt">Frankfurt</option>
-              <option value="Bonn">Bonn</option>
-              <option value="Munich">Munich</option>
-              <option value="Hamburg">Hamburg</option>
+              {% for city in cities %}
+              <option value="{{ city.name }}">{{ city.name }}</option>
+              {% endfor %}
             </select>
           </div>
 
@@ -36,9 +38,16 @@
               <option selected="true" disabled="disabled">
                 Choose Manager
               </option>
-              <option value="Abdulkerim">Abdulkerim Corbo</option>
+              {% for manager in managers %}
+              <option value="{{ manager.user.id }}">
+                {{ manager.user.first_name }} {{ manager.user.last_name }}
+              </option>
+              {% endfor %}
             </select>
           </div>
+        </div>
+        <div class="form-row">
+          
         </div>
         <button class="btn btn-secondary btn-block mt-4" type="submit">
           Search

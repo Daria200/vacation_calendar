@@ -1,20 +1,23 @@
 from django.shortcuts import render
+from employees.models import Employee, City
 
 
-# Display employee's own dashboard (short list of the events on the left,
-# calender with the days on the right)
-# see how many days are used this year
-def dashboard(request):
-    return render(request, "dashboard.html")
+# Display employee's calendar
+# Click a cell and add a request
+# add a short list on the left side
+def calendar(request):
+    return render(request, "employee_view/calendar.html")
 
 
-# Managers can view calendars of the employees in the list form
-# see how many days are used this year
+# TODO:redo
 def employee_calendar(request):
-    return render(request, "employee_calendar.html")
+    managers = Employee.objects.filter(is_manager=True)
+    cities = City.objects.all()
+    context={"managers":managers, 'cities':cities}
+    return render(request, "employee_calendar.html", context)
 
 
-# Display employees' own event in a list format
-# delete or change days
-def events(request):
-    return render(request, "events.html")
+# Employees can see their progress and which days they have taken
+# they will see how many days are left
+def dashboard(request):
+    return render(request, "employee_view/dashboard.html")

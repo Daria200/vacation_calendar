@@ -3,7 +3,12 @@ import calendar
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
-from .models import AvailableDays, PublicHolidays, Vacation
+from .models import (
+    AvailableDays,
+    PublicHolidays,
+    Vacation,
+    Request,
+)
 
 
 class MonthFilter(admin.SimpleListFilter):
@@ -19,8 +24,14 @@ class MonthFilter(admin.SimpleListFilter):
 
 
 class PublicHolidaysAdmin(admin.ModelAdmin):
-    list_display = ["city", "date"]
-    list_filter = ["city"]
+    list_display = ["date", "name", "in_cities"]
+
+    list_filter = [
+        "cities",
+    ]
+
+    def in_cities(self, day):
+        return ",\n".join([city.name for city in day.cities.all()])
 
 
 class VacationAdmin(admin.ModelAdmin):
@@ -31,6 +42,7 @@ class VacationAdmin(admin.ModelAdmin):
         "full_day",
         "type",
         "description",
+        "approved",
     ]
     search_fields = ["employee__user__last_name", "employee__user__first_name"]
 
@@ -52,20 +64,45 @@ class VacationAdmin(admin.ModelAdmin):
 
 
 class AvailableDaysAdmin(admin.ModelAdmin):
-    list_display =["employee_name", "employee_surname",'year','allotted_days', 'transferred_days']
-    list_filter = ["employee__user__last_name",'year']
+    list_display = [
+        "employee_name",
+        "employee_surname",
+        "year",
+        "allotted_days",
+        "transferred_days",
+    ]
+    list_filter = ["employee__user__last_name", "year"]
     search_fields = ["employee__user__last_name", "employee__user__first_name"]
     list_display_links = ["employee_name", "employee_surname"]
-    
+
     def employee_name(self, obj):
         return obj.employee.user.first_name
 
     def employee_surname(self, obj):
         return obj.employee.user.last_name
 
-    employee_name.short_description = "First Name"
-    employee_surname.short_description = "Last Name"
+
+class RequestAdmin(admin.ModelAdmin):
+    list_display = [
+        "employee_name",
+        "employee_surname",
+        "request_type",
+        "start_date",
+        "end_date",
+        "created_at",
+        "last_modified",
+    ]
+    search_fields = ["employee__user__last_name", "employee__user__first_name"]
+    list_display_links = ["employee_name", "employee_surname"]
+
+    def employee_name(self, obj):
+        return obj.employee.user.first_name
+
+    def employee_surname(self, obj):
+        return obj.employee.user.last_name
+
 
 admin.site.register(Vacation, VacationAdmin)
 admin.site.register(PublicHolidays, PublicHolidaysAdmin)
 admin.site.register(AvailableDays, AvailableDaysAdmin)
+admin.site.register(Request, RequestAdmin)

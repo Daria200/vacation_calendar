@@ -1,0 +1,136 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your Vacation</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" /> 
+    <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/calendar_main.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/calendar.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
+
+    {% block extracss %}{% endblock %}
+  </head>
+  <body>
+    <!-- Top Bar -->
+
+    <div class="topbar container row justify-content-between">
+      <div class="left col-4">
+        <span class="nav-user-name">
+          {% if user.is_authenticated %}
+            <h2>Hello, {{ user.first_name }}</h2>
+          {% else %}
+            <h2>Hello, Guest</h2>
+          {% endif %}
+        </span>
+      </div>
+        <div class="right col-4 d-flex justify-content-end">
+          <!-- <a href="../logout.html" class="logout-btn">Log out</a> -->
+          <div class="container">
+            <!-- TODO: clear cookies after clicking log out -->
+            <a href="{% url 'logout' %}" class="logout-btn btn btn-secondary btn-block col-md-6">Log out</a>
+         </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Left Side -->
+    <div class="leftside">
+        <div class="logo">
+          <a href="{% url 'calendar' %}">
+            <span>
+              <img
+                src="{% static 'images/systemverification_logo.png' %}"
+                alt="logo-large"
+                class="logo"
+              />
+            </span>
+          </a>
+        </div>
+        <div class="leftside-menu">
+          <ul>
+            <li 
+              {% if '/' == request.path %}
+                class="menu-item active-link"
+              {% else %}
+                class="menu-item"
+              {% endif %}
+              >
+              <a href="{% url 'calendar' %}">
+                <i class="fa-solid fa-calendar-days" style="color: #ffffff"></i>Calendar
+              </a>
+            </li>
+            <li 
+            {% if '/dashboard' == request.path %}
+              class="menu-item active-link"
+            {% else %}
+              class="menu-item"
+            {% endif %}
+            >
+              <a href="{% url 'dashboard' %}">
+                <i class="fa-solid fa-eye" style="color: #ffffff"></i>
+                Dashboard
+              </a>
+            </li>
+            <li
+            {% if '/vacation_request' == request.path %}
+              class="menu-item active-link"
+            {% else %}
+              class="menu-item"
+            {% endif %}>
+              <a href="{% url 'vacation_request' %}">
+                <i class="fa-solid fa-plus" style="color: #ffffff"></i>
+                Vacation request
+              </a>
+            </li>
+            <li
+            {% if '/transfer_days_request' == request.path %}
+              class="menu-item active-link"
+            {% else %}
+              class="menu-item"
+            {% endif %}>
+              <a href="{% url 'transfer_days_request' %}">
+                <i class="fa-solid fa-plus" style="color: #ffffff"></i>
+                Transfer days
+              </a>
+            </li>
+            <li
+            {% if '/cancel_vacation_days' == request.path %}
+              class="menu-item active-link"
+            {% else %}
+              class="menu-item"
+            {% endif %}>
+              <a href="{% url 'cancel_vacation_days' %}">
+                <i class="fa-solid fa-trash-can" style="color: #ffffff"></i>
+                Cancel vacation days
+              </a>
+            </li>
+            <!-- TODO: needs to be remade -->
+            <li class="menu-item">
+              <a href="{% url 'hr_view' %}" target="_blank">
+                <i class="fa-solid fa-eye" style="color: #ffffff"></i>
+                Manager View
+              </a>
+            </li>
+          </ul>
+        </div>
+    </div>
+
+    <!-- Main BLock -->
+    {% block content %} {% endblock %}
+
+    <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static 'js/popper.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script 
+    src="https://kit.fontawesome.com/65d2e5b72d.js"
+    crossorigin="anonymous"
+  ></script>
+  {% block extrascripts %}{% endblock %}
+  </body>
+</html>
