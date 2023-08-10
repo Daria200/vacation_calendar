@@ -1,5 +1,5 @@
-from datetime import timedelta, date
 import datetime
+from datetime import date, timedelta
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -7,7 +7,8 @@ from django.db import transaction
 from django.shortcuts import redirect, render
 
 from employees.models import Employee
-from .models import VacationDay, PublicHolidays, Request, AvailableDays
+
+from .models import AvailableDays, PublicHolidays, Request, VacationDay
 
 
 # Create your views here.
