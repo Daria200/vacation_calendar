@@ -7,7 +7,7 @@ from django.db import transaction
 from django.shortcuts import redirect, render
 
 from employees.models import Employee
-from .models import Vacation, PublicHolidays, Request
+from .models import VacationDay, PublicHolidays, Request, AvailableDays
 
 
 # Create your views here.
@@ -27,7 +27,10 @@ def vacation_request(request):
     # Reject if the sum of requested + saved days exceed available days (sum allotted and transferred)
     # Save in bulk
 
+    # A vacation can start in december and end in januar
+
     if request.method == "POST":
+        print(request.POST)
         user_id = request.user.id
         employee = Employee.objects.get(user_id=user_id)
         employee_id = employee.id
@@ -49,7 +52,7 @@ def vacation_request(request):
         # Get Public holidays:
         # Need the city and the year
         employee_city = request.user.employee.city
-        current_year = date.today().year
+        current_year = start_date.year
         # Get public holidays for this year
         public_holidays_this_year = PublicHolidays.objects.filter(
             cities=employee_city,
@@ -73,8 +76,19 @@ def vacation_request(request):
             public_holidays_set.add(current_date)
 
         # Saved days in the database
-        vacation_days_saved_in_db = Vacation.objects.filter(employee=employee)
+        vacation_days_saved_in_db = VacationDay.objects.filter(
+            employee=employee, date__year=current_year
+        )
 
+        # Get number of available days for the employee
+        available_days_instance = AvailableDays.objects.get(
+            employee=employee, year=current_year
+        )
+        # Calculate total available days
+        total_available_days = (
+            available_days_instance.allotted_days
+            + available_days_instance.transferred_days
+        )
         # Create a list of Vacation instances to save in bulk
         vacation_instances = []
 
@@ -96,7 +110,7 @@ def vacation_request(request):
 
                 # Create a Vacation instance and prepare to save it to the database
                 vacation_instances.append(
-                    Vacation(
+                    VacationDay(
                         employee=employee,
                         date=current_date,
                         full_day=full_day,
@@ -106,21 +120,32 @@ def vacation_request(request):
                     )
                 )
 
-        # Use bulk_create to save the instances in bulk
-
         if len(vacation_instances) > 0:
-            with transaction.atomic():
-                Vacation.objects.bulk_create(vacation_instances)
-                Request.objects.create(
-                    employee=employee,
-                    start_date=startdate,
-                    end_date=enddate,
-                    description=description,
-                    request_type=1,
+            # Check if the employee does not exceed the available days
+            if (
+                len(vacation_instances) + len(vacation_days_saved_in_db)
+                > total_available_days
+            ):
+                available_days_for_the_year = total_available_days - len(
+                    vacation_days_saved_in_db
                 )
-            messages.success(
-                request, f"You requested {len(vacation_instances)} days"
-            )
+                messages.error(
+                    request,
+                    f"You requested {len(vacation_instances)} days, but you have only {int(total_available_days) - len(vacation_days_saved_in_db)} available days for {current_year}",
+                )
+            else:
+                with transaction.atomic():
+                    VacationDay.objects.bulk_create(vacation_instances)
+                    Request.objects.create(
+                        employee=employee,
+                        start_date=startdate,
+                        end_date=enddate,
+                        description=description,
+                        request_type=1,
+                    )
+                messages.success(
+                    request, f"You requested {len(vacation_instances)} days"
+                )
         return redirect("vacation_request")
 
     return render(request, "employee_view/vacation_request.html")

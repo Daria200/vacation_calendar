@@ -7,6 +7,7 @@ from .models import City, Employee
 
 
 def register(request):
+    managers = Employee.objects.filter(is_manager=True)
     if request.method == "POST":
         # Get form values
         first_name = request.POST["first_name"]
@@ -29,7 +30,6 @@ def register(request):
             messages.error(request, "User with this email is already registered")
             return redirect("register")
 
-        # TODO:what should be the username?
         with transaction.atomic():
             user = User.objects.create_user(
                 username=email,
@@ -49,7 +49,6 @@ def register(request):
         # TODO:add message : SUCCESS
         return redirect("calendar")
 
-    managers = Employee.objects.filter(is_manager=True)
     cities = City.objects.all()
     context = {"managers": managers, "cities": cities}
     return render(request, "employee_view/register.html", context)

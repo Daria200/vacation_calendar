@@ -6,7 +6,7 @@ from employees.models import City, Employee
 
 
 # TODO: rename VacationDay?
-class Vacation(models.Model):
+class VacationDay(models.Model):
     TYPE_CHOICES = ((1, "Vacation"), (2, "Special leave"))
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     date = models.DateField()
