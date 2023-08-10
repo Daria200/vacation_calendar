@@ -89,6 +89,7 @@ class RequestAdmin(admin.ModelAdmin):
         "request_type",
         "start_date",
         "end_date",
+        "request_status",
         "created_at",
         "last_modified",
     ]

@@ -16,16 +16,9 @@ def vacation_request(request):
     # Get the days
     # exclude saturdays and sundays
     # return error, if the days are already in the database
-    # exclude public holidays this of this year
-    # exclude public holidays that happen every year
-    # check if the employee does not exceed the available days
-    # Get public holidays, saved_days
+    # exclude public holidays this of this year and public holidays that happen every year
     # Calculate the amount of days requested (not weekend, not public holiday, not in the DB)
-
-    # DO NOT FORGET
-
     # Reject if the sum of requested + saved days exceed available days (sum allotted and transferred)
-    # Save in bulk
 
     # A vacation can start in december and end in januar
 

@@ -48,7 +48,7 @@ class AvailableDays(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     allotted_days = models.IntegerField(default=30)
     transferred_days = models.DecimalField(default=0, max_digits=2, decimal_places=1)
-    # TODO: make sure this is the year in which 
+    # TODO: make sure this is the year in which
     year = models.IntegerField(default=datetime.datetime.now().year, editable=True)
 
     def __str__(self):
@@ -61,11 +61,13 @@ class AvailableDays(models.Model):
 
 class Request(models.Model):
     TYPES = ((1, "vacation"), (2, "transfer"), (3, "cancel"))
+    STATUS_OPTIONS = ((1, "pending"), (2, "approved"), (3, "rejected"))
 
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     start_date = models.DateField()
     end_date = models.DateField()
     description = models.TextField(max_length=200, null=True, blank=True)
-    request_type = models.IntegerField(choices=TYPES)
+    request_type = models.IntegerField(choices=TYPES, default=1)
+    request_status = models.IntegerField(choices=STATUS_OPTIONS)
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
