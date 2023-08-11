@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from .models import (
     AvailableDays,
     PublicHolidays,
-    Vacation,
+    VacationDay,
     Request,
 )
 
@@ -34,7 +34,7 @@ class PublicHolidaysAdmin(admin.ModelAdmin):
         return ",\n".join([city.name for city in day.cities.all()])
 
 
-class VacationAdmin(admin.ModelAdmin):
+class VacationDayAdmin(admin.ModelAdmin):
     list_display = [
         "employee_name",
         "employee_surname",
@@ -89,6 +89,7 @@ class RequestAdmin(admin.ModelAdmin):
         "request_type",
         "start_date",
         "end_date",
+        "request_status",
         "created_at",
         "last_modified",
     ]
@@ -102,7 +103,7 @@ class RequestAdmin(admin.ModelAdmin):
         return obj.employee.user.last_name
 
 
-admin.site.register(Vacation, VacationAdmin)
+admin.site.register(VacationDay, VacationDayAdmin)
 admin.site.register(PublicHolidays, PublicHolidaysAdmin)
 admin.site.register(AvailableDays, AvailableDaysAdmin)
 admin.site.register(Request, RequestAdmin)

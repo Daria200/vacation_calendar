@@ -5,7 +5,8 @@ from django.db import models
 from employees.models import City, Employee
 
 
-class Vacation(models.Model):
+# TODO: rename VacationDay?
+class VacationDay(models.Model):
     TYPE_CHOICES = ((1, "Vacation"), (2, "Special leave"))
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     date = models.DateField()
@@ -42,10 +43,12 @@ class PublicHolidays(models.Model):
         verbose_name_plural = "Public holidays"
 
 
+# TODO: rename AvailableDay. Use singular names, not plural, for model names
 class AvailableDays(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     allotted_days = models.IntegerField(default=30)
     transferred_days = models.DecimalField(default=0, max_digits=2, decimal_places=1)
+    # TODO: make sure this is the year in which
     year = models.IntegerField(default=datetime.datetime.now().year, editable=True)
 
     def __str__(self):
@@ -58,11 +61,13 @@ class AvailableDays(models.Model):
 
 class Request(models.Model):
     TYPES = ((1, "vacation"), (2, "transfer"), (3, "cancel"))
+    STATUS_OPTIONS = ((1, "pending"), (2, "approved"), (3, "rejected"))
 
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     start_date = models.DateField()
     end_date = models.DateField()
     description = models.TextField(max_length=200, null=True, blank=True)
-    request_type = models.IntegerField(choices=TYPES)
+    request_type = models.IntegerField(choices=TYPES, default=1)
+    request_status = models.IntegerField(choices=STATUS_OPTIONS, default=1)
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
