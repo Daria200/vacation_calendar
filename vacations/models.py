@@ -68,6 +68,6 @@ class Request(models.Model):
     end_date = models.DateField()
     description = models.TextField(max_length=200, null=True, blank=True)
     request_type = models.IntegerField(choices=TYPES, default=1)
-    request_status = models.IntegerField(choices=STATUS_OPTIONS)
+    request_status = models.IntegerField(choices=STATUS_OPTIONS, default=1)
     created_at = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)

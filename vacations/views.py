@@ -24,7 +24,6 @@ def vacation_request(request):
     # A vacation can start in december and end in januar
 
     if request.method == "POST":
-        print(request.POST)
         user_id = request.user.id
         employee = Employee.objects.get(user_id=user_id)
         employee_id = employee.id
