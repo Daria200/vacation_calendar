@@ -11,22 +11,19 @@ from employees.models import Employee
 from .models import AvailableDays, PublicHolidays, Request, VacationDay
 
 
-# Create your views here.
 @login_required
 def vacation_request(request):
-    # Get the days
-    # exclude saturdays and sundays
-    # return error, if the days are already in the database
-    # exclude public holidays this of this year and public holidays that happen every year
-    # Calculate the amount of days requested (not weekend, not public holiday, not in the DB)
-    # Reject if the sum of requested + saved days exceed available days (sum allotted and transferred)
+    # exclude saturdays and sundays, public holidays, save it in the database
+    # return error if:
+    #   the days are already in the database
+    #   the sum of requested + saved days exceed available days
 
+    # TODO: edge case
     # A vacation can start in december and end in januar
 
     if request.method == "POST":
         user_id = request.user.id
         employee = Employee.objects.get(user_id=user_id)
-        employee_id = employee.id
 
         # Get form values from the form
         startdate = request.POST["startdate"]
@@ -68,16 +65,19 @@ def vacation_request(request):
             current_date = date(current_year, holiday.date.month, holiday.date.day)
             public_holidays_set.add(current_date)
 
-        # Saved days in the database
+        # Get saved days in the database
         vacation_days_saved_in_db = VacationDay.objects.filter(
             employee=employee, date__year=current_year
         )
+        vacation_days_saved_in_db_list = [
+            day.date.strftime("%Y-%m-%d") for day in vacation_days_saved_in_db
+        ]
 
         # Get number of available days for the employee
         available_days_instance = AvailableDays.objects.get(
             employee=employee, year=current_year
         )
-        # Calculate total available days
+        # Calculate total available days (allotted+transferred)
         total_available_days = (
             available_days_instance.allotted_days
             + available_days_instance.transferred_days
@@ -85,7 +85,6 @@ def vacation_request(request):
         # Create a list of Vacation instances to save in bulk
         vacation_instances = []
 
-        # Exclude weekends (Saturday and Sunday)
         # Loop through each day between the start and end dates
         for i in range(num_days):
             current_date = start_date + timedelta(days=i)
@@ -96,8 +95,7 @@ def vacation_request(request):
                 and current_date not in public_holidays_set
             ):
                 # Check if the record is in the DB
-                # TODO: do not use a query to check this. queries in loop == no bueno
-                if vacation_days_saved_in_db.filter(date=current_date).exists():
+                if current_date.strftime("%Y-%m-%d") in vacation_days_saved_in_db_list:
                     messages.error(request, f"You already requested {current_date}")
                     break
 
@@ -119,9 +117,6 @@ def vacation_request(request):
                 len(vacation_instances) + len(vacation_days_saved_in_db)
                 > total_available_days
             ):
-                available_days_for_the_year = total_available_days - len(
-                    vacation_days_saved_in_db
-                )
                 messages.error(
                     request,
                     f"You requested {len(vacation_instances)} days, but you have only {int(total_available_days) - len(vacation_days_saved_in_db)} available days for {current_year}",
