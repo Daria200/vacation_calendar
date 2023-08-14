@@ -1,11 +1,11 @@
-from datetime import date, timedelta
-
 import pytest
-from django.urls import reverse
 from django.contrib.auth.models import User
+from django.test import Client
+from django.urls import reverse
+from parameterized import parameterized
 
-from vacations.models import AvailableDays, VacationDay
-from employees.models import Employee, City
+from employees.models import City, Employee
+from vacations.models import AvailableDays, Request, VacationDay
 
 
 @pytest.fixture
@@ -145,3 +145,93 @@ def test_request_existing_days(client, employee_user):
         },
     )
     assert VacationDay.objects.filter(employee=employee).count() == 5
+
+
+@pytest.fixture
+def manager_user():
+    # Create a manager user
+    user = User.objects.create_user(
+        username="manager",
+        password="managerpass",
+        email="manager@gmail.com",
+    )
+
+    return user
+
+
+@pytest.fixture
+def client_with_manager_logged_in(client, manager_user):
+    # Create a client instance
+    client = Client()
+
+    # Log in the manager user
+    manager_user_data = {
+        "username": "manager",
+        "password": "managerpass",
+    }
+    client.login(**manager_user_data)
+
+    return client
+
+
+@pytest.fixture
+def available_days(manager_user):
+    # Create and setup AvailableDays instance
+    city = City.objects.create(name="Frankfurt", state=6)
+    manager_employee = Employee.objects.create(
+        user=manager_user,
+        city=city,
+        is_manager=True,
+    )
+    available_days = AvailableDays.objects.create(
+        employee=manager_employee,
+        allotted_days=30,
+        transferred_days=5.0,
+        year=2023,
+    )
+    available_days.save()
+    return available_days
+
+
+@pytest.mark.parametrize(
+    "action, expected_status",
+    [
+        ("approve", 2),
+        ("reject", 3),
+    ],
+)
+@pytest.mark.django_db
+def test_aprove_reject_vacation_request(
+    client_with_manager_logged_in, available_days, action, expected_status
+):
+    client = client_with_manager_logged_in  # Rename for clarity
+
+    # Create a test vacation request
+    response = client.post(
+        reverse("vacation_request"),
+        {
+            "startdate": "2023-08-14",
+            "enddate": "2023-08-17",
+            "vacation_type": 1,
+            "length": 1.0,
+            "description": "Some description",
+        },
+    )
+    assert response.status_code == 302
+
+    # Get the created request
+    request = Request.objects.first()
+    assert request.request_status == 1
+
+    # Perform the action (approve or reject)
+    response = client.post(
+        reverse("vacation_requests"),
+        {
+            "selected_requests": [request.id],
+            "action": action,
+        },
+    )
+    assert response.status_code == 302
+
+    # Check the updated request status
+    assert Request.objects.get(pk=request.id).request_status == expected_status
