@@ -10,11 +10,11 @@ def register(request):
     managers = Employee.objects.filter(is_manager=True)
     if request.method == "POST":
         # Get form values
-        first_name = request.POST["first_name"]
-        last_name = request.POST["last_name"]
-        email = request.POST["email"]
-        password = request.POST["password"]
-        password2 = request.POST["password2"]
+        first_name = request.POST["first_name"].strip()
+        last_name = request.POST["last_name"].strip()
+        email = request.POST["email"].strip()
+        password = request.POST["password"].strip()
+        password2 = request.POST["password2"].strip()
         city_name = request.POST["city"]
         manager_id = request.POST["manager"]
         # TODO: validate the manager is in fact a user with is_manager=True
@@ -56,8 +56,8 @@ def register(request):
 
 def login(request):
     if request.method == "POST":
-        email = request.POST["email"]
-        password = request.POST["password"]
+        email = request.POST["email"].strip()
+        password = request.POST["password"].strip()
         user = User.objects.get(email=email)
         username = user.username
 

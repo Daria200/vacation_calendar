@@ -20,6 +20,7 @@ def vacation_request(request):
 
     # TODO: edge case
     # A vacation can start in december and end in januar
+    # An employee can request 0.5 day
 
     if request.method == "POST":
         user_id = request.user.id
