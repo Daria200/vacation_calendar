@@ -147,6 +147,67 @@ def test_request_existing_days(client, employee_user):
     assert VacationDay.objects.filter(employee=employee).count() == 5
 
 
+@pytest.mark.parametrize(
+    "start_date, end_date,status_code, vacation_days_cur_year, allotted_days_last_year, transferred_days_current_year",
+    [
+        ("2024-01-14", "2024-01-17", 302, 3, 27, 3),
+        ("2024-01-14", "2024-02-17", 200, 0, 30, 0),
+    ],
+)
+@pytest.mark.django_db
+def test_transfer_request(
+    client,
+    employee_user,
+    start_date,
+    end_date,
+    status_code,
+    vacation_days_cur_year,
+    allotted_days_last_year,
+    transferred_days_current_year,
+):
+    employee = employee_user
+
+    available_days = AvailableDays.objects.create(
+        employee=employee, allotted_days=30, transferred_days=0.0, year=2023
+    )
+    available_days = AvailableDays.objects.create(
+        employee=employee, allotted_days=30, transferred_days=0.0, year=2024
+    )
+
+    assert (
+        AvailableDays.objects.filter(employee=employee, year=2023).first().allotted_days
+        == 30
+    )
+    client.force_login(employee.user)
+
+    response = client.post(
+        reverse("transfer_days_request"),
+        {
+            "startdate": start_date,
+            "enddate": end_date,
+            "vacation_type": 2,
+            "length": 1.0,
+            "description": "Some description",
+        },
+    )
+
+    assert response.status_code == status_code
+    assert (
+        VacationDay.objects.filter(employee=employee, date__year=2024).count()
+        == vacation_days_cur_year
+    )
+    assert (
+        AvailableDays.objects.filter(employee=employee, year=2023).first().allotted_days
+        == allotted_days_last_year
+    )
+    assert (
+        AvailableDays.objects.filter(employee=employee, year=2024)
+        .first()
+        .transferred_days
+        == transferred_days_current_year
+    )
+
+
 @pytest.fixture
 def manager_user():
     # Create a manager user

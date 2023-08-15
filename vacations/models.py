@@ -46,7 +46,7 @@ class PublicHolidays(models.Model):
 class AvailableDays(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     allotted_days = models.IntegerField(default=30)
-    transferred_days = models.DecimalField(default=0, max_digits=2, decimal_places=1)
+    transferred_days = models.DecimalField(default=0, max_digits=4, decimal_places=1)
     # TODO: make sure this is the year in which
     year = models.IntegerField(default=datetime.datetime.now().year, editable=True)
 
