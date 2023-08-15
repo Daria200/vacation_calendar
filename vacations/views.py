@@ -96,7 +96,6 @@ def vacation_request(request):
     #   the sum of requested + saved days exceed available days
 
     # TODO: edge case
-    # A vacation can start in december and end in januar
     # An employee can request 0.5 day
 
     if request.method == "POST":
@@ -140,6 +139,7 @@ def vacation_request(request):
                 return redirect("vacation_request")
 
         num_days_this_year = num_days
+        num_days_next_year = 0
         if spans_multi_years:
             num_days_this_year = (
                 datetime.date(year=start_date.year, month=12, day=31) - start_date
@@ -158,6 +158,7 @@ def vacation_request(request):
             description,
         )
 
+        days_to_save_in_db_for_next_year = list()
         if spans_multi_years:
             days_to_save_in_db_for_next_year = verify_days(
                 employee,
@@ -173,17 +174,15 @@ def vacation_request(request):
         # Get number of available days for the employee
         available_days = AvailableDays.objects.get(employee=employee, year=start_year)
 
-        if spans_multi_years:
-            available_days_next_year = AvailableDays.objects.get(
-                employee=employee, year=end_year
-            )
-
         # Calculate total available days (allotted+transferred)
         total_available_days = (
             available_days.allotted_days + available_days.transferred_days
         )
 
         if spans_multi_years:
+            available_days_next_year = AvailableDays.objects.get(
+                employee=employee, year=end_year
+            )
             total_available_days_next_year = (
                 available_days_next_year.allotted_days
                 + available_days_next_year.transferred_days
@@ -206,8 +205,7 @@ def vacation_request(request):
         else:
             with transaction.atomic():
                 VacationDay.objects.bulk_create(days_to_save_in_db_for_this_year)
-                if spans_multi_years:
-                    VacationDay.objects.bulk_create(days_to_save_in_db_for_next_year)
+                VacationDay.objects.bulk_create(days_to_save_in_db_for_next_year)
                 Request.objects.create(
                     employee=employee,
                     start_date=startdate,
@@ -215,9 +213,9 @@ def vacation_request(request):
                     description=description,
                     request_type=1,
                 )
-            num_days_requested = len(days_to_save_in_db_for_this_year)
-            if spans_multi_years:
-                num_days_requested += len(days_to_save_in_db_for_next_year)
+            num_days_requested = len(days_to_save_in_db_for_this_year) + len(
+                days_to_save_in_db_for_next_year
+            )
             messages.success(
                 request,
                 f"You requested {num_days_requested} days",
