@@ -2,6 +2,8 @@ from django.db import transaction
 from django.shortcuts import redirect, render
 
 from vacations.models import Request, VacationDay
+from vacations.views import verify_days
+from employees.models import Employee
 
 
 def vacation_requests(request):
@@ -55,6 +57,17 @@ def transfer_days_requests(request):
     if request.method == "POST":
         selected_request_ids = request.POST.getlist("selected_requests")
         action = request.POST.get("action")
+
+        print(action)
+
+        # Check requested days to transfer do not exceed 10 days in total
+        selected_employee_ids = request.POST.getlist("selected_employees")
+        print("ids", selected_employee_ids)
+
+        for request_id in selected_request_ids:
+            employee = Employee.objects.get(request__pk=request_id)
+            print(employee)
+
         requests_to_update = Request.objects.filter(pk__in=selected_request_ids)
 
         if action == "approve":
@@ -82,7 +95,7 @@ def transfer_days_requests(request):
                     request.request_status = 3
                     request.save()
 
-        return redirect("vacation_requests")
+        return redirect("transfer_days_requests")
     return render(request, "manager_view/transfer_days_requests.html", context)
 
 

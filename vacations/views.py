@@ -179,6 +179,7 @@ def vacation_request(request):
 
 
 # check that the dates are in the first three months of the year
+# remove alloted days from previuos year, add transferred days to this year after approved
 @login_required
 def transfer_days_request(request):
     if request.method == "POST":
