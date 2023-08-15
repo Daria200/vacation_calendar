@@ -17,7 +17,7 @@ def verify_days(
     start_date,
     end_date,
     num_days,
-    current_year,
+    start_year,
     full_day,
     type,
     description,
@@ -30,7 +30,7 @@ def verify_days(
         start_date (_type_): _description_
         end_date (_type_): _description_
         num_days (_type_): _description_
-        current_year (_type_): _description_
+        start_year (_type_): _description_
         full_day (_type_): _description_
         type (_type_): _description_
         description (_type_): _description_
@@ -46,7 +46,7 @@ def verify_days(
     # Get public holidays for this year
     public_holidays_this_year = PublicHolidays.objects.filter(
         cities=employee.city,
-        date__year=current_year,
+        date__year=start_year,
         every_year=False,
     )
     # Get public holidays that happen every year
@@ -62,7 +62,7 @@ def verify_days(
 
     # Add public holidays that happen every year to the set, adjusting the year to the current year
     for holiday in public_holidays_every_year:
-        current_date = date(current_year, holiday.date.month, holiday.date.day)
+        current_date = date(start_year, holiday.date.month, holiday.date.day)
         public_holidays_set.add(current_date)
 
     # Create a list of Vacation instances to save in bulk
@@ -115,9 +115,9 @@ def vacation_request(request):
         # Get saved days in the database
         start_date = datetime.datetime.strptime(startdate, "%Y-%m-%d").date()
         end_date = datetime.datetime.strptime(enddate, "%Y-%m-%d").date()
-        current_year = start_date.year
+        start_year = start_date.year
         vacation_days_saved_in_db = VacationDay.objects.filter(
-            employee=employee, date__year=current_year
+            employee=employee, date__year=start_year
         )
         vacation_days_saved_in_db_list = [
             day.date.strftime("%Y-%m-%d") for day in vacation_days_saved_in_db
@@ -135,7 +135,7 @@ def vacation_request(request):
             start_date,
             end_date,
             num_days,
-            current_year,
+            start_year,
             full_day,
             vacation_type,
             description,
@@ -144,7 +144,7 @@ def vacation_request(request):
         # Check if the employee does not exceed the available days
         # Get number of available days for the employee
         available_days_instance = AvailableDays.objects.get(
-            employee=employee, year=current_year
+            employee=employee, year=start_year
         )
         # Calculate total available days (allotted+transferred)
         total_available_days = (
@@ -157,7 +157,7 @@ def vacation_request(request):
         ):
             messages.error(
                 request,
-                f"You requested {len(days_to_save_in_db)} days, but you have only {int(total_available_days) - len(vacation_days_saved_in_db)} available days for {current_year}",
+                f"You requested {len(days_to_save_in_db)} days, but you have only {int(total_available_days) - len(vacation_days_saved_in_db)} available days for {start_year}",
             )
         else:
             with transaction.atomic():
@@ -193,9 +193,9 @@ def transfer_days_request(request):
         # Get saved days in the database
         start_date = datetime.datetime.strptime(startdate, "%Y-%m-%d").date()
         end_date = datetime.datetime.strptime(enddate, "%Y-%m-%d").date()
-        current_year = start_date.year
+        start_year = start_date.year
         vacation_days_saved_in_db = VacationDay.objects.filter(
-            employee=employee, date__year=current_year
+            employee=employee, date__year=start_year
         )
         vacation_days_saved_in_db_list = [
             day.date.strftime("%Y-%m-%d") for day in vacation_days_saved_in_db
@@ -214,14 +214,14 @@ def transfer_days_request(request):
             start_date,
             end_date,
             num_days,
-            current_year,
+            start_year,
             full_day,
             vacation_type,
             description,
         )
         available_days_instance = AvailableDays.objects.get(
             employee=employee,
-            year=current_year,
+            year=start_year,
         )
         number_of_transferred_days = available_days_instance.transferred_days
         all_transferred = number_of_transferred_days + len(days_to_save_in_db)
@@ -250,7 +250,7 @@ def transfer_days_request(request):
                 available_days_instance.save()
 
                 # Update transferred days for the previous year
-                previous_year = current_year - 1
+                previous_year = start_year - 1
                 previous_year_available_days = AvailableDays.objects.get(
                     employee=employee, year=previous_year
                 )
@@ -260,7 +260,7 @@ def transfer_days_request(request):
                 previous_year_available_days.save()
             messages.success(
                 request,
-                f"You requested {len(days_to_save_in_db)} days to transfer to {current_year} year",
+                f"You requested {len(days_to_save_in_db)} days to transfer to {start_year} year",
             )
             return redirect("transfer_days_request")
     return render(request, "employee_view/transfer_days_request.html")
