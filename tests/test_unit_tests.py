@@ -48,7 +48,6 @@ def employee_user():
 @pytest.mark.django_db
 def test_verify_days(client, employee_user):
     employee = employee_user
-    employee_city = employee.city
     # 7 work days
     start_date = datetime.date(year=2023, month=10, day=6)  # "2023-10-06"
     end_date = datetime.date(year=2023, month=10, day=16)  # "2023-10-16"
@@ -59,7 +58,6 @@ def test_verify_days(client, employee_user):
     description = "some"
     days_to_save_in_db = verify_days(
         employee,
-        employee_city,
         start_date,
         end_date,
         num_days,

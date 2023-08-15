@@ -14,7 +14,6 @@ from .models import AvailableDays, PublicHolidays, Request, VacationDay
 
 def verify_days(
     employee,
-    employee_city,
     start_date,
     end_date,
     num_days,
@@ -46,13 +45,13 @@ def verify_days(
 
     # Get public holidays for this year
     public_holidays_this_year = PublicHolidays.objects.filter(
-        cities=employee_city,
+        cities=employee.city,
         date__year=current_year,
         every_year=False,
     )
     # Get public holidays that happen every year
     public_holidays_every_year = PublicHolidays.objects.filter(
-        cities=employee_city,
+        cities=employee.city,
         every_year=True,
     )
 
@@ -112,7 +111,6 @@ def vacation_request(request):
         vacation_type = request.POST["vacation_type"]
         full_day = float(request.POST["length"])
         description = request.POST.get("description")
-        employee_city = request.user.employee.city
 
         # Get saved days in the database
         start_date = datetime.datetime.strptime(startdate, "%Y-%m-%d").date()
@@ -134,7 +132,6 @@ def vacation_request(request):
 
         days_to_save_in_db = verify_days(
             employee,
-            employee_city,
             start_date,
             end_date,
             num_days,
@@ -192,7 +189,6 @@ def transfer_days_request(request):
         vacation_type = 1
         full_day = "1.0"
         description = request.POST.get("description")
-        employee_city = request.user.employee.city
 
         # Get saved days in the database
         start_date = datetime.datetime.strptime(startdate, "%Y-%m-%d").date()
@@ -215,7 +211,6 @@ def transfer_days_request(request):
                 return redirect("transfer_days_request")
         days_to_save_in_db = verify_days(
             employee,
-            employee_city,
             start_date,
             end_date,
             num_days,
