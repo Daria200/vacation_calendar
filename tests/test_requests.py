@@ -72,6 +72,40 @@ def test_valid_vacation_request(client, employee_user):
 
 
 @pytest.mark.django_db
+def test_valid_vacation_dec_to_jan_request(client, employee_user):
+    employee = employee_user
+
+    available_days = AvailableDays.objects.create(
+        employee=employee, allotted_days=30, transferred_days=0.0, year=2023
+    )
+    available_days = AvailableDays.objects.create(
+        employee=employee, allotted_days=30, transferred_days=0.0, year=2024
+    )
+    available_days.save()
+
+    assert (
+        AvailableDays.objects.filter(employee=employee, year=2023).first().allotted_days
+        == 30
+    )
+    client.force_login(employee.user)
+
+    response = client.post(
+        reverse("vacation_request"),
+        {
+            "startdate": "2023-12-25",
+            "enddate": "2024-01-05",
+            "vacation_type": 1,
+            "length": 1.0,
+            "description": "Some description",
+        },
+    )
+
+    assert response.status_code == 302
+    assert VacationDay.objects.filter(employee=employee, date__year=2023).count() == 5
+    assert VacationDay.objects.filter(employee=employee, date__year=2024).count() == 5
+
+
+@pytest.mark.django_db
 def test_exceeding_available_days(client, employee_user):
     employee = employee_user
 

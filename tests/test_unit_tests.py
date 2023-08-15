@@ -56,14 +56,15 @@ def test_verify_days(client, employee_user):
     full_day = 1.0
     vacation_type = 1
     description = "some"
+    start_year = 2023
     days_to_save_in_db = verify_days(
         employee,
         start_date,
-        end_date,
         num_days,
-        current_year,
+        start_year,
         full_day,
         vacation_type,
         description,
     )
+
     assert len(days_to_save_in_db) == 7
