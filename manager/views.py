@@ -59,23 +59,25 @@ def transfer_days_requests(request):
         action = request.POST.get("action")
 
         print(action)
+        requests_to_approve = Request.objects.filter(
+            request_type=2, request_status=1, pk__in=selected_request_ids
+        )
+        print("requests_to_approve", requests_to_approve)
 
-        # Check requested days to transfer do not exceed 10 days in total
-        selected_employee_ids = request.POST.getlist("selected_employees")
-        print("ids", selected_employee_ids)
+        employees_requested_transfer = ()
+        for request in requests_to_approve:
+            print(request.employee)
+            print(request.employee_id)
+            employees_requested_transfer.apppend(request.employee)
 
-        for request_id in selected_request_ids:
-            employee = Employee.objects.get(request__pk=request_id)
-            print(employee)
-
-        requests_to_update = Request.objects.filter(pk__in=selected_request_ids)
-
+        for employee in employees_requested_transfer:
+            pass
         if action == "approve":
             with transaction.atomic():
-                requests_to_update.update(request_status=2)
+                requests_to_approve.update(request_status=2)
 
                 # Update vacation days for each approved request
-                for request in requests_to_update:
+                for request in requests_to_approve:
                     start_date = request.start_date
                     end_date = request.end_date
                     vacation_days = VacationDay.objects.filter(
