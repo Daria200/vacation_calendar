@@ -1,5 +1,7 @@
 {% extends 'manager_view/manager_base.html' %} {% block content %}
 <div class="container">
+  <!-- Alerts -->
+  {% include '_alerts.html' %}
   <form
     id="vacation-form"
     action="{% url 'transfer_days_requests'  %}"

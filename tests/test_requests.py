@@ -150,7 +150,7 @@ def test_request_existing_days(client, employee_user):
 @pytest.mark.parametrize(
     "start_date, end_date,status_code, vacation_days_cur_year, allotted_days_last_year, transferred_days_current_year",
     [
-        ("2024-01-14", "2024-01-17", 302, 3, 27, 3),
+        ("2024-01-14", "2024-01-17", 302, 3, 30, 0),
         ("2024-01-14", "2024-02-17", 200, 0, 30, 0),
     ],
 )

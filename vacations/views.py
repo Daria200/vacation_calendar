@@ -199,33 +199,65 @@ def transfer_days_request(request):
             if current_date.strftime("%Y-%m-%d") in vacation_days_saved_in_db_list:
                 messages.error(request, f"You already requested {current_date}")
                 return redirect("transfer_days_request")
-        days_to_save_in_db = verify_days(
-            employee,
-            start_date,
-            end_date,
-            num_days,
-            start_year,
-            full_day,
-            vacation_type,
-            description,
-        )
+        days_to_save_in_db = verify_days(employee, start_date, num_days, start_year)
         available_days_instance = AvailableDays.objects.get(
             employee=employee,
             year=start_year,
         )
         number_of_transferred_days = available_days_instance.transferred_days
         all_transferred = number_of_transferred_days + len(days_to_save_in_db)
-        if len(days_to_save_in_db) > 10 or all_transferred > 10:
+
+        # Check the sum of transferred days for requests that are pending
+        pending_requests = Request.objects.filter(
+            employee=employee,
+            request_type=2,
+            request_status=1,
+            start_date__year=start_year,
+        )
+        total_requested_days_pending = 0
+        for pending_request in pending_requests:
+            num_days = (pending_request.end_date - pending_request.start_date).days + 1
+            work_days = verify_days(
+                employee,
+                pending_request.start_date,
+                num_days,
+                pending_request.start_date.year,
+            )
+            total_requested_days_pending += len(work_days)
+
+        total_days_requested_requested_to_transfer = (
+            total_requested_days_pending
+            + len(days_to_save_in_db)
+            + number_of_transferred_days
+        )
+
+        if (
+            len(days_to_save_in_db) > 10
+            or all_transferred > 10
+            or total_days_requested_requested_to_transfer > 10
+        ):
             messages.error(
                 request,
                 f"You can request to transfer up to 10 days.\n"
                 f"You request {len(days_to_save_in_db)} days.\n"
-                f"You have {number_of_transferred_days} transferred days for the next year",
+                f"You have {number_of_transferred_days} days transferred or requested to transfer  for the next year",
             )
         else:
+            vacation_instances = []
+            for day in days_to_save_in_db:
+                vacation_instances.append(
+                    VacationDay(
+                        employee=employee,
+                        date=day,
+                        full_day=full_day,
+                        approved=False,
+                        type=vacation_type,
+                        description=description,
+                    )
+                )
             with transaction.atomic():
                 # create vacation days and the request
-                VacationDay.objects.bulk_create(days_to_save_in_db)
+                VacationDay.objects.bulk_create(vacation_instances)
                 Request.objects.create(
                     employee=employee,
                     start_date=startdate,
