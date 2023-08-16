@@ -1,60 +1,73 @@
 {% extends 'manager_view/manager_base.html' %} {% block content %}
 <div class="container">
-  <table class="table" style="margin: 10px 0">
-    <thead>
-      <tr>
-        <th scope="col">Name</th>
-        <th scope="col">From</th>
-        <th scope="col">Till</th>
-        <th scope="col">Description</th>
-        <th scope="col">Requested</th>
-        <th>
-          <div class="form-check">
-            <input
-              class="form-check-input select-all"
-              type="checkbox"
-              value=""
-              id="flexCheckDefault"
-            />
-            <label class="form-check-label" for="flexCheckDefault"> </label>
-          </div>
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for request in vacation_requests%}
-      <tr>
-        <td>
-          {{ request.employee.user.first_name }} 
-          {{request.employee.user.last_name }}
-        </td>
-        <td>{{ request.start_date }} </td>
-        <td>{{ request.end_date }} </td>
-        <td>{{ request.description }}</td>
-        <td>{{ request.created_at }}</td>
-        <td> 
+  <form
+    id="vacation-form"
+    action="{% url 'vacation_requests'  %}"
+    method="POST"
+  >
+    {% csrf_token %}
+    <table class="table" style="margin: 10px 0">
+      <thead>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">From</th>
+          <th scope="col">Till</th>
+          <th scope="col">Description</th>
+          <th scope="col">Requested</th>
+          <th scope="col">Choose</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for request in vacation_requests%}
+        <tr>
+          <td>
+            {{ request.employee.user.first_name }}
+            {{request.employee.user.last_name }}
+          </td>
+          <td>{{ request.start_date }}</td>
+          <td>{{ request.end_date }}</td>
+          <td>{{ request.description }}</td>
+          <td>{{ request.created_at|date:"d-m-Y" }}</td>
+          <td>
             <div class="form-check">
-                <input
+              <input
                 class="form-check-input"
                 type="checkbox"
-                value=""
+                value="{{ request.id }}"
+                name="selected_requests"
                 id="flexCheckDefault"
-                />
+              />
             </div>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <button
+      class="btn btn-success mt-4"
+      type="submit"
+      name="action"
+      value="approve"
+    >
+      Approve
+    </button>
+    <button
+      class="btn btn-danger mt-4"
+      type="submit"
+      name="action"
+      value="reject"
+    >
+      Reject
+    </button>
+  </form>
 </div>
 <script>
-    function toggleAllCheckboxes(source) {
-      var checkboxes = document.getElementsByName('requests');
-      for (var i = 0, n = checkboxes.length; i < n; i++) {
-        checkboxes[i].checked = source.checked;
-      }
+  function toggleAllCheckboxes(source) {
+    var checkboxes = document.getElementsByName("requests");
+    for (var i = 0, n = checkboxes.length; i < n; i++) {
+      checkboxes[i].checked = source.checked;
     }
-  </script>
-  
-{% endblock %}
+  }
+</script>
 
+{% endblock %}

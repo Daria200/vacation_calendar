@@ -41,6 +41,7 @@ class Employee(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="employees_manager",
+        null=True,
     )
 
     city = models.ForeignKey(City, on_delete=models.SET_NULL, blank=True, null=True)

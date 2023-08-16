@@ -1,7 +1,73 @@
-{% extends 'manager_view/manager_base.html' %} 
-{% block content %}
+{% extends 'manager_view/manager_base.html' %} {% block content %}
 <div class="container">
-    <h1>Requests to transfer days</h1>
+  <form
+    id="vacation-form"
+    action="{% url 'transfer_days_requests'  %}"
+    method="POST"
+  >
+    {% csrf_token %}
+    <table class="table" style="margin: 10px 0">
+      <thead>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">From</th>
+          <th scope="col">Till</th>
+          <th scope="col">Description</th>
+          <th scope="col">Requested</th>
+          <th scope="col">Choose</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for request in transfer_requests%}
+        <tr>
+          <td>
+            {{ request.employee.user.first_name }}
+            {{request.employee.user.last_name }}
+          </td>
+          <td>{{ request.start_date }}</td>
+          <td>{{ request.end_date }}</td>
+          <td>{{ request.description }}</td>
+          <td>{{ request.created_at|date:"d-m-Y" }}</td>
+          <td>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                value="{{ request.id }}"
+                name="selected_requests"
+                id="flexCheckDefault"
+              />
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <button
+      class="btn btn-success mt-4"
+      type="submit"
+      name="action"
+      value="approve"
+    >
+      Approve
+    </button>
+    <button
+      class="btn btn-danger mt-4"
+      type="submit"
+      name="action"
+      value="reject"
+    >
+      Reject
+    </button>
+  </form>
 </div>
-{% endblock %}
+<script>
+  function toggleAllCheckboxes(source) {
+    var checkboxes = document.getElementsByName("requests");
+    for (var i = 0, n = checkboxes.length; i < n; i++) {
+      checkboxes[i].checked = source.checked;
+    }
+  }
+</script>
 
+{% endblock %}
