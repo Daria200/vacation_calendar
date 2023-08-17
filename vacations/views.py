@@ -240,7 +240,7 @@ def transfer_days_request(request):
                 request,
                 f"You can request to transfer up to 10 days.\n"
                 f"You request {len(days_to_save_in_db)} days.\n"
-                f"You have {number_of_transferred_days} days transferred or requested to transfer  for the next year",
+                f"You have {number_of_transferred_days+total_requested_days_pending} days transferred or requested to transfer  for the next year",
             )
         else:
             vacation_instances = []
@@ -265,21 +265,6 @@ def transfer_days_request(request):
                     description=description,
                     request_type=2,
                 )
-                # # Update available days for the current year
-                # available_days_instance.transferred_days = F("transferred_days") + len(
-                #     days_to_save_in_db
-                # )
-                # available_days_instance.save()
-
-                # # Update transferred days for the previous year
-                # previous_year = start_year - 1
-                # previous_year_available_days = AvailableDays.objects.get(
-                #     employee=employee, year=previous_year
-                # )
-                # previous_year_available_days.allotted_days = F("allotted_days") - len(
-                #     days_to_save_in_db
-                # )
-                # previous_year_available_days.save()
             messages.success(
                 request,
                 f"You requested {len(days_to_save_in_db)} days to transfer to {start_year} year",

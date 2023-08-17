@@ -1,9 +1,9 @@
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.db.models import F
 from django.shortcuts import redirect, render
 
-from employees.models import Employee
-from vacations.models import Request, VacationDay
+from vacations.models import AvailableDays, Request, VacationDay
 from vacations.views import verify_days
 
 
@@ -19,6 +19,7 @@ def vacation_requests(request):
 
         if action == "approve":
             # Update request status and corresponding vacation days
+            # Remove allotted days for this year and add transferred days for the next year
             with transaction.atomic():
                 requests_to_update.update(request_status=2)
 
@@ -29,8 +30,10 @@ def vacation_requests(request):
                     vacation_days = VacationDay.objects.filter(
                         employee=request.employee, date__range=(start_date, end_date)
                     )
-                    # TODO: does it work?
-                    vacation_days.update(approved=True)
+                    for vacation_day in vacation_days:
+                        vacation_day.approved = True
+                        vacation_day.save()
+
         elif action == "reject":
             # Delete vacation days and update request status
             with transaction.atomic():
@@ -62,33 +65,12 @@ def transfer_days_requests(request):
         selected_request_ids = request.POST.getlist("selected_requests")
         action = request.POST.get("action")
 
-        print(action)
         requests_to_approve = Request.objects.filter(
             request_type=2, request_status=1, pk__in=selected_request_ids
         )
 
-        employees_requested_transfer = set()
-        for request in requests_to_approve:
-            employees_requested_transfer.add(request.employee)
-
-        for employee in employees_requested_transfer:
-            employee_requests = requests_to_approve.filter(employee=employee)
-            total_days_requested = 0
-            for request in employee_requests:
-                num_days = (request.end_date - request.start_date).days + 1
-                work_days = verify_days(
-                    employee,
-                    request.start_date,
-                    num_days,
-                    request.start_date.year,
-                )
-                total_days_requested += len(work_days)
-            print(employee, total_days_requested)
-
         if action == "approve":
             with transaction.atomic():
-                requests_to_approve.update(request_status=2)
-
                 # Update vacation days for each approved request
                 for request in requests_to_approve:
                     start_date = request.start_date
@@ -96,11 +78,42 @@ def transfer_days_requests(request):
                     vacation_days = VacationDay.objects.filter(
                         employee=request.employee, date__range=(start_date, end_date)
                     )
-                    vacation_days.update(approved=True)
+                    for vacation_day in vacation_days:
+                        vacation_day.approved = True
+                        vacation_day.save()
+                    num_days = (end_date - start_date).days + 1
+                    start_year = start_date.year
+                    employee = request.employee
+                    num_of_work_days = verify_days(
+                        employee, start_date, num_days, start_year
+                    )
+                # Update the requests. Request_status 2 is approved
+                requests_to_approve.update(request_status=2)
+
+                # Reduce allotted days for this year and add transferred days for the next year
+                available_days_instance = AvailableDays.objects.get(
+                    employee=employee,
+                    year=start_year,
+                )
+                available_days_instance.transferred_days = F("transferred_days") + len(
+                    num_of_work_days
+                )
+                available_days_instance.save()
+
+                # Update allotted days for the previous year
+                previous_year = start_year - 1
+                previous_year_available_days = AvailableDays.objects.get(
+                    employee=employee, year=previous_year
+                )
+                previous_year_available_days.allotted_days = F("allotted_days") - len(
+                    num_of_work_days
+                )
+                previous_year_available_days.save()
+
         elif action == "reject":
             # Delete vacation days and update request status
             with transaction.atomic():
-                for request in requests_to_update:
+                for request in requests_to_approve:
                     start_date = request.start_date
                     end_date = request.end_date
                     vacation_days_to_delete = VacationDay.objects.filter(
