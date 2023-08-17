@@ -42,71 +42,6 @@ def employee_user():
 
 
 @pytest.mark.django_db
-def test_valid_vacation_request(client, employee_user):
-    employee = employee_user
-
-    available_days = AvailableDays.objects.create(
-        employee=employee, allotted_days=30, transferred_days=5.0, year=2023
-    )
-    available_days.save()
-
-    assert (
-        AvailableDays.objects.filter(employee=employee, year=2023).first().allotted_days
-        == 30
-    )
-    client.force_login(employee.user)
-
-    response = client.post(
-        reverse("vacation_request"),
-        {
-            "startdate": "2023-08-14",
-            "enddate": "2023-08-17",
-            "vacation_type": 1,
-            "length": 1.0,
-            "description": "Some description",
-        },
-    )
-
-    assert response.status_code == 302
-    assert VacationDay.objects.filter(employee=employee).count() == 4
-
-
-@pytest.mark.django_db
-def test_exceeding_available_days(client, employee_user):
-    employee = employee_user
-
-    available_days = AvailableDays.objects.create(
-        employee=employee, allotted_days=15, transferred_days=0, year=2023
-    )
-
-    available_days.save()
-
-    assert (
-        AvailableDays.objects.filter(employee=employee, year=2023).first().allotted_days
-        == 15
-    )
-    client.force_login(employee.user)
-
-    response = client.post(
-        reverse("vacation_request"),
-        {
-            "startdate": "2023-08-14",
-            "enddate": "2023-09-20",
-            "vacation_type": 1,
-            "length": 1.0,
-            "description": "Test vacation request",
-        },
-    )
-
-    assert response.status_code == 302
-    # It did not create new vacation days, because the request exceed the amount of available days
-    assert (
-        AvailableDays.objects.filter(employee=employee, year=2023).first().allotted_days
-        == 15
-    )
-
-
-@pytest.mark.django_db
 def test_request_existing_days(client, employee_user):
     employee = employee_user
 
@@ -148,6 +83,67 @@ def test_request_existing_days(client, employee_user):
 
 
 @pytest.mark.parametrize(
+    "start_date, end_date, num_vacation_days_2023, num_vacation_days_2024, status_code",
+    [
+        ("2023-01-02", "2023-01-15", 10, 0, 302),
+        ("2023-08-14", "2023-08-20", 5, 0, 302),
+        ("2023-12-25", "2024-01-05", 5, 5, 302),
+        ("2023-09-01", "2024-11-20", 0, 0, 302),
+    ],
+)
+@pytest.mark.django_db
+def test_vacation_requests(
+    client,
+    employee_user,
+    start_date,
+    end_date,
+    num_vacation_days_2023,
+    num_vacation_days_2024,
+    status_code,
+):
+    employee = employee_user
+
+    available_days = AvailableDays.objects.create(
+        employee=employee, allotted_days=20, transferred_days=0, year=2023
+    )
+    available_days = AvailableDays.objects.create(
+        employee=employee, allotted_days=30, transferred_days=0, year=2024
+    )
+
+    available_days.save()
+
+    assert (
+        AvailableDays.objects.filter(employee=employee, year=2023).first().allotted_days
+        == 20
+    )
+    assert (
+        AvailableDays.objects.filter(employee=employee, year=2024).first().allotted_days
+        == 30
+    )
+    client.force_login(employee.user)
+
+    response = client.post(
+        reverse("vacation_request"),
+        {
+            "startdate": start_date,
+            "enddate": end_date,
+            "vacation_type": 1,
+            "length": 1.0,
+            "description": "Test vacation request",
+        },
+    )
+    assert response.status_code == status_code
+    assert (
+        VacationDay.objects.filter(employee=employee, date__year=2023).count()
+        == num_vacation_days_2023
+    )
+    assert (
+        VacationDay.objects.filter(employee=employee, date__year=2024).count()
+        == num_vacation_days_2024
+    )
+
+
+@pytest.mark.parametrize(
     "start_date, end_date,status_code, vacation_days_cur_year, allotted_days_last_year, transferred_days_current_year",
     [
         ("2024-01-14", "2024-01-17", 302, 3, 30, 0),
@@ -167,10 +163,10 @@ def test_transfer_request(
 ):
     employee = employee_user
 
-    available_days = AvailableDays.objects.create(
+    AvailableDays.objects.create(
         employee=employee, allotted_days=30, transferred_days=0.0, year=2023
     )
-    available_days = AvailableDays.objects.create(
+    AvailableDays.objects.create(
         employee=employee, allotted_days=30, transferred_days=0.0, year=2024
     )
 
