@@ -8,39 +8,6 @@ from employees.models import City, Employee
 from vacations.models import AvailableDays, Request, VacationDay
 
 
-@pytest.fixture
-def employee_user():
-    city = City.objects.create(name="Frankfurt", state=6)
-
-    # Create a manager user
-    manager_user = User.objects.create_user(
-        username="manager",
-        password="managerpass",
-        email="manager@gmail.com",
-    )
-
-    # Create a manager employee instance
-    manager_employee = Employee.objects.create(
-        user=manager_user,
-        city=city,
-        is_manager=True,
-    )
-
-    # Create a regular employee instance and assign the manager
-    user = User.objects.create_user(
-        username="testuser",
-        password="testpass",
-        email="admin@gmail.com",
-    )
-    employee = Employee.objects.create(
-        user=user,
-        manager=manager_user,  # Assign the manager instance
-        city=city,
-        is_manager=False,
-    )
-    return employee
-
-
 @pytest.mark.django_db
 def test_request_existing_days(client, employee_user):
     employee = employee_user
@@ -204,52 +171,6 @@ def test_transfer_request(
     )
 
 
-@pytest.fixture
-def manager_user():
-    # Create a manager user
-    user = User.objects.create_user(
-        username="manager",
-        password="managerpass",
-        email="manager@gmail.com",
-    )
-
-    return user
-
-
-@pytest.fixture
-def client_with_manager_logged_in(client, manager_user):
-    # Create a client instance
-    client = Client()
-
-    # Log in the manager user
-    manager_user_data = {
-        "username": "manager",
-        "password": "managerpass",
-    }
-    client.login(**manager_user_data)
-
-    return client
-
-
-@pytest.fixture
-def available_days(manager_user):
-    # Create and setup AvailableDays instance
-    city = City.objects.create(name="Frankfurt", state=6)
-    manager_employee = Employee.objects.create(
-        user=manager_user,
-        city=city,
-        is_manager=True,
-    )
-    available_days = AvailableDays.objects.create(
-        employee=manager_employee,
-        allotted_days=30,
-        transferred_days=5.0,
-        year=2023,
-    )
-    available_days.save()
-    return available_days
-
-
 @pytest.mark.parametrize(
     "action, expected_status",
     [
@@ -259,9 +180,9 @@ def available_days(manager_user):
 )
 @pytest.mark.django_db
 def test_aprove_reject_vacation_request(
-    client_with_manager_logged_in, available_days, action, expected_status
+    logged_in_manager_client, available_days, action, expected_status
 ):
-    client = client_with_manager_logged_in  # Rename for clarity
+    client = logged_in_manager_client  # Rename for clarity
 
     # Create a test vacation request
     response = client.post(
@@ -283,6 +204,48 @@ def test_aprove_reject_vacation_request(
     # Perform the action (approve or reject)
     response = client.post(
         reverse("vacation_requests"),
+        {
+            "selected_requests": [request.id],
+            "action": action,
+        },
+    )
+    assert response.status_code == 302
+
+    # Check the updated request status
+    assert Request.objects.get(pk=request.id).request_status == expected_status
+
+
+@pytest.mark.parametrize(
+    "action, expected_status",
+    [
+        ("approve", 2),
+        ("reject", 3),
+    ],
+)
+@pytest.mark.django_db
+def test_aprove_reject_transfer_request(
+    logged_in_manager_client, available_days, action, expected_status
+):
+    client = logged_in_manager_client
+
+    # Create a test transfer request
+    response = client.post(
+        reverse("transfer_days_request"),
+        {
+            "startdate": "2024-01-02",
+            "enddate": "2024-01-05",
+            "description": "Some description",
+        },
+    )
+    assert response.status_code == 302
+
+    # Get the created request
+    request = Request.objects.filter(request_type=2)
+    assert request.request_status == 1
+
+    # Perform the action (approve or reject)
+    response = client.post(
+        reverse("transfer_days_requests"),
         {
             "selected_requests": [request.id],
             "action": action,
