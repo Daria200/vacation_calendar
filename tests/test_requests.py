@@ -1,10 +1,8 @@
 import pytest
-from django.contrib.auth.models import User
-from django.test import Client
 from django.urls import reverse
 from parameterized import parameterized
+from datetime import timedelta
 
-from employees.models import City, Employee
 from vacations.models import AvailableDays, Request, VacationDay
 
 
@@ -172,15 +170,20 @@ def test_transfer_request(
 
 
 @pytest.mark.parametrize(
-    "action, expected_status",
+    "start_date, end_date, action, expected_status",
     [
-        ("approve", 2),
-        ("reject", 3),
+        ("2023-08-14", "2023-08-17", "approve", 2),
+        ("2023-08-14", "2023-08-17", "reject", 3),
     ],
 )
 @pytest.mark.django_db
 def test_aprove_reject_vacation_request(
-    logged_in_manager_client, available_days, action, expected_status
+    logged_in_manager_client,
+    available_days,
+    start_date,
+    end_date,
+    action,
+    expected_status,
 ):
     client = logged_in_manager_client  # Rename for clarity
 
@@ -213,20 +216,97 @@ def test_aprove_reject_vacation_request(
 
     # Check the updated request status
     assert Request.objects.get(pk=request.id).request_status == expected_status
+    if action == "approve":
+        vacation_days_in_db = VacationDay.objects.filter(
+            employee=request.employee, date__range=(start_date, end_date)
+        )
+        for day in vacation_days_in_db:
+            assert day.approved == True
+
+    if action == "reject":
+        assert (
+            len(
+                VacationDay.objects.filter(
+                    employee=request.employee, date__range=(start_date, end_date)
+                )
+            )
+            == 0
+        )
+
+    response = client.post(
+        reverse("vacation_request"),
+        {
+            "startdate": "2023-07-21",
+            "enddate": "2023-07-23",
+            "vacation_type": 1,
+            "length": 1.0,
+            "description": "Some description",
+        },
+    )
+    assert response.status_code == 302
+    response = client.post(
+        reverse("vacation_request"),
+        {
+            "startdate": "2023-09-01",
+            "enddate": "2023-09-05",
+            "vacation_type": 1,
+            "length": 1.0,
+            "description": "Some description",
+        },
+    )
+
+    assert Request.objects.get(id=2).request_status == 1
+    assert Request.objects.get(id=3).request_status == 1
+    # Perform the action (approve or reject)
+    response = client.post(
+        reverse("vacation_requests"),
+        {
+            "selected_requests": [2, 3],
+            "action": "approve",
+        },
+    )
+    assert Request.objects.get(id=2).request_status == 2
+    assert Request.objects.get(id=3).request_status == 2
+    vacation_days_in_db = VacationDay.objects.filter(
+        employee=request.employee, date__range=("2023-07-21", "2023-07-23")
+    )
+    for day in vacation_days_in_db:
+        assert day.approved == True
+    vacation_days_in_db = VacationDay.objects.filter(
+        employee=request.employee, date__range=("2023-09-01", "2023-09-05")
+    )
+    for day in vacation_days_in_db:
+        assert day.approved == True
 
 
 @pytest.mark.parametrize(
-    "action, expected_status",
+    "action, request_status, allotted_days_2023, transfer_days_2024",
     [
-        ("approve", 2),
-        ("reject", 3),
+        ("approve", 2, 26, 4),
+        ("reject", 3, 30, 0),
     ],
 )
 @pytest.mark.django_db
-def test_aprove_reject_transfer_request(
-    logged_in_manager_client, available_days, action, expected_status
+def test_approve_or_reject_transfer_requests(
+    client,
+    employee_user,
+    action,
+    request_status,
+    allotted_days_2023,
+    transfer_days_2024,
 ):
-    client = logged_in_manager_client
+    employee = employee_user
+    #
+    AvailableDays.objects.create(
+        employee=employee, allotted_days=30, transferred_days=0, year=2023
+    )
+    AvailableDays.objects.create(
+        employee=employee, allotted_days=30, transferred_days=0, year=2024
+    )
+    available_days_2023 = AvailableDays.objects.get(employee=employee, year=2023)
+    assert available_days_2023.allotted_days == 30
+
+    client.force_login(employee.user)
 
     # Create a test transfer request
     response = client.post(
@@ -238,12 +318,13 @@ def test_aprove_reject_transfer_request(
         },
     )
     assert response.status_code == 302
+    print("response", response)
 
     # Get the created request
-    request = Request.objects.filter(request_type=2)
+    request = Request.objects.get(request_type=2, employee=employee)
     assert request.request_status == 1
 
-    # Perform the action (approve or reject)
+    # Perform the action (approve)
     response = client.post(
         reverse("transfer_days_requests"),
         {
@@ -254,4 +335,40 @@ def test_aprove_reject_transfer_request(
     assert response.status_code == 302
 
     # Check the updated request status
-    assert Request.objects.get(pk=request.id).request_status == expected_status
+    updated_request = Request.objects.get(pk=request.id)
+    assert updated_request.request_status == request_status
+
+    # Check if vacation days are approved
+    vacation_days = VacationDay.objects.filter(
+        employee=employee, date__range=("2024-01-02", "2024-01-05")
+    )
+    assert all(vacation_day.approved for vacation_day in vacation_days)
+
+    # Check if available days are updated
+    updated_available_days = AvailableDays.objects.get(employee=employee, year=2023)
+    assert updated_available_days.allotted_days == allotted_days_2023
+
+    updated_available_days = AvailableDays.objects.get(employee=employee, year=2024)
+    assert updated_available_days.transferred_days == transfer_days_2024
+
+    # Perform the action (reject)
+    response = client.post(
+        reverse("transfer_days_requests"),
+        {
+            "selected_requests": [request.id],
+            "action": "reject",
+        },
+    )
+    assert response.status_code == 302
+
+    # Check the updated request status
+    updated_request = Request.objects.get(pk=request.id)
+    assert updated_request.request_status == 3
+
+    # Check if vacation days are deleted
+    assert not VacationDay.objects.filter(
+        employee=employee, date__range=("2024-01-02", "2024-01-05")
+    ).exists()
+
+    # Check if available days are not further updated after rejection
+    updated_available_days = AvailableDays.objects.get(employee=employee, year=2023)
