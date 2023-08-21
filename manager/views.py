@@ -35,7 +35,7 @@ def vacation_requests(request):
                 vacation_request_to_approve_or_reject.request_status = 2
                 vacation_request_to_approve_or_reject.save()
                 vacation_days_to_approve_or_reject.update(approved=True)
-                messages.successr(request, f"The request has been approved")
+                messages.success(request, f"The request has been approved")
 
         elif action == "reject":
             # delete vacation days in db (VacationDay)
@@ -44,7 +44,7 @@ def vacation_requests(request):
                 vacation_request_to_approve_or_reject.request_status = 3
                 vacation_request_to_approve_or_reject.save()
                 vacation_days_to_approve_or_reject.delete()
-                messages.successr(request, f"The request has been rejected")
+                messages.success(request, f"The request has been rejected")
 
         return redirect("vacation_requests")
 

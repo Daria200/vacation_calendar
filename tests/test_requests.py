@@ -284,7 +284,7 @@ def test_approve_or_reject_transfer_requests(
     response = client.post(
         reverse("transfer_days_requests"),
         {
-            "selected_requests": [request.id],
+            "selected_request_id": request.id,
             "action": action,
         },
     )
@@ -311,7 +311,7 @@ def test_approve_or_reject_transfer_requests(
     response = client.post(
         reverse("transfer_days_requests"),
         {
-            "selected_requests": [request.id],
+            "selected_request_id": request.id,
             "action": "reject",
         },
     )
