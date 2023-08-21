@@ -208,7 +208,7 @@ def test_aprove_reject_vacation_request(
     response = client.post(
         reverse("vacation_requests"),
         {
-            "selected_requests": [request.id],
+            "selected_request_id": request.id,
             "action": action,
         },
     )
@@ -216,6 +216,7 @@ def test_aprove_reject_vacation_request(
 
     # Check the updated request status
     assert Request.objects.get(pk=request.id).request_status == expected_status
+
     if action == "approve":
         vacation_days_in_db = VacationDay.objects.filter(
             employee=request.employee, date__range=(start_date, end_date)
@@ -232,51 +233,6 @@ def test_aprove_reject_vacation_request(
             )
             == 0
         )
-
-    response = client.post(
-        reverse("vacation_request"),
-        {
-            "startdate": "2023-07-21",
-            "enddate": "2023-07-23",
-            "vacation_type": 1,
-            "length": 1.0,
-            "description": "Some description",
-        },
-    )
-    assert response.status_code == 302
-    response = client.post(
-        reverse("vacation_request"),
-        {
-            "startdate": "2023-09-01",
-            "enddate": "2023-09-05",
-            "vacation_type": 1,
-            "length": 1.0,
-            "description": "Some description",
-        },
-    )
-
-    assert Request.objects.get(id=2).request_status == 1
-    assert Request.objects.get(id=3).request_status == 1
-    # Perform the action (approve or reject)
-    response = client.post(
-        reverse("vacation_requests"),
-        {
-            "selected_requests": [2, 3],
-            "action": "approve",
-        },
-    )
-    assert Request.objects.get(id=2).request_status == 2
-    assert Request.objects.get(id=3).request_status == 2
-    vacation_days_in_db = VacationDay.objects.filter(
-        employee=request.employee, date__range=("2023-07-21", "2023-07-23")
-    )
-    for day in vacation_days_in_db:
-        assert day.approved == True
-    vacation_days_in_db = VacationDay.objects.filter(
-        employee=request.employee, date__range=("2023-09-01", "2023-09-05")
-    )
-    for day in vacation_days_in_db:
-        assert day.approved == True
 
 
 @pytest.mark.parametrize(

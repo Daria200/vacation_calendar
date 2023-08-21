@@ -13,26 +13,26 @@ from .models import AvailableDays, PublicHolidays, Request, VacationDay
 
 
 def verify_days(
-    employee,
-    start_date,
-    num_days,
-    start_year,
+    employee: Employee,
+    start_date: date,
+    num_days: int,
+    start_year: int,
 ):
     """_summary_
 
     Args:
-        employee (_type_): _description_
-        start_date (_type_): _description_
-        num_days (_type_): _description_
-        start_year (_type_): _description_
+        employee Employee: Instance of the Employee class
+        start_date date: Date when vacation request starts
+        num_days int: Number of days between start and end date icluding weekends and holidays
+        start_year int: Year when the vacation starts
 
 
 
-    Using start and end date, exclude weekends and public holidays
-    Return days to save
+    Using start and number of days, exclude weekends and public holidays
+    Return only work days
 
     Returns:
-        list of vacation_instances
+        list of work days
     """
 
     # Get public holidays for this year
