@@ -32,13 +32,13 @@
           <td>{{ request.created_at|date:"d-m-Y" }}</td>
           <td>
             <button
-              class="btn btn-success mt-4 approve-button"
+              class="btn btn-success approve-button"
               data-request-id="{{ request.id }}"
             >
               Approve
             </button>
             <button
-              class="btn btn-danger mt-4 reject-button"
+              class="btn btn-danger reject-button"
               data-request-id="{{ request.id }}"
             >
               Reject
@@ -48,6 +48,13 @@
         {% endfor %}
       </tbody>
     </table>
+    <input
+      type="hidden"
+      name="selected_request_id"
+      id="selected-request-id"
+      value=""
+    />
+    <input type="hidden" name="action" id="selected-action" value="" />
   </form>
 </div>
 <script>
