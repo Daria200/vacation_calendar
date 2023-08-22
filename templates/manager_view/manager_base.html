@@ -69,7 +69,11 @@
       href="{% url 'cancel_days_requests' %}">Cancel days requests</a>
 
       <!-- TODO: make it work -->
-      <a href="#">log out</a>
+      <a href="javascript:{document.getElementById('logout').submit()}">log out</a>
+      <form action="{% url 'logout' %}" method="POST" id="logout">
+        {% csrf_token %}
+        <input type="hidden">
+      </form>
     </div>
   </div>
 

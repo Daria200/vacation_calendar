@@ -1,4 +1,4 @@
-from django.contrib import messages, auth
+from django.contrib import auth, messages
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
@@ -75,4 +75,7 @@ def login(request):
 
 
 def logout(request):
-    return redirect("login")
+    if request.method == "POST":
+        auth.logout(request)
+        messages.success(request, "You are now logged out")
+        return redirect("login")

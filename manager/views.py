@@ -7,7 +7,14 @@ from django.shortcuts import redirect, render
 from vacations.models import AvailableDays, Request, VacationDay
 from vacations.views import verify_days
 
+from django.contrib.auth.decorators import user_passes_test
 
+
+def is_manager(user):
+    return user.is_authenticated and user.employee.is_manager
+
+
+@user_passes_test(is_manager)
 @login_required
 def vacation_requests(request):
     vacation_requests = Request.objects.filter(request_type=1, request_status=1)
@@ -51,6 +58,7 @@ def vacation_requests(request):
     return render(request, "manager_view/vacation_days_requests.html", context)
 
 
+@user_passes_test(is_manager)
 @login_required
 def transfer_days_requests(request):
     # If a request is approved, set the status to approved and create vacation days,

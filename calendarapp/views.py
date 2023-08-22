@@ -42,10 +42,13 @@ def dashboard(request):
     employee = Employee.objects.get(user_id=user_id)
     current_year = date.today().year
 
-    all_requests = Request.objects.filter()
+    all_requests = Request.objects.filter(
+        employee=employee, start_date__year=current_year
+    )
     vacation_days_saved_in_db_this_year = VacationDay.objects.filter(
         employee=employee, date__year=current_year
     )
+
     num_of_vac_days = len(vacation_days_saved_in_db_this_year)
     available_days_instance = AvailableDays.objects.get(
         employee=employee, year=current_year
@@ -54,9 +57,8 @@ def dashboard(request):
     num_of_transferred_days = available_days_instance.transferred_days
     all_available_days = num_of_alloted_days + num_of_transferred_days
     days_left_this_year = all_available_days - num_of_vac_days
-    usage = round((days_left_this_year / all_available_days) * 100)
+    usage = round((num_of_vac_days / all_available_days) * 100)
 
-    print(vacation_days_saved_in_db_this_year)
     context = {
         "all_requests": all_requests,
         "num_of_vac_days": num_of_vac_days,
