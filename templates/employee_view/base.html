@@ -19,7 +19,7 @@
 
     <div class="topbar container row justify-content-between">
       <div class="left col-4">
-        <span class="nav-user-name">
+        <span class="nav-user-name" style="margin: 0 20px">
           {% if user.is_authenticated %}
             <h2>Hello, {{ user.first_name }}</h2>
           {% else %}

@@ -1,10 +1,68 @@
-{% extends 'employee_view/base.html' %} 
-{% block content %}
-<div class="container">
+{% extends 'employee_view/base.html' %} {% block content %}
+<!-- <div class="container">
     <h2>Here you will see</h2>
     <h3>Approved days</h3>
     <h3>Pending days</h3>
     <h3>your public holidays</h3>
     <h3>How many days you can use this year</h3>
+</div> -->
+<div class="container">
+  <div class="container">
+    <table class="table" style="margin: 10px 0 20px 0">
+      <thead>
+        <tr>
+          <th scope="col">Used or planned this year</th>
+          <th scope="col">Allotted days for this</th>
+          <th scope="col">Transferred days for this year</th>
+          <th scope="col">Days left this year</th>
+          <th scope="col">Usage</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="text-center">{{ num_of_vac_days }}</td>
+          <td class="text-center">{{ num_of_alloted_days }}</td>
+          <td class="text-center">{{ num_of_transferred_days }}</td>
+          <td class="text-center">{{ days_left_this_year }}</td>
+          <td class="text-center">
+            {{ usage }}%
+            <div class="progress progress-striped">
+              <div
+                class="bar"
+                style="width: {{ usage }}%; background-color: black"
+              ></div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="container">
+    <table class="table" style="margin: 10px 0">
+      <thead>
+        <tr>
+          <th scope="col">From</th>
+          <th scope="col">Till</th>
+          <th scope="col">Request type</th>
+          <th scope="col">Request Status</th>
+          <th scope="col">Requested</th>
+          <th scope="col">Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for request in all_requests%}
+        <tr>
+          <td>{{ request.start_date }}</td>
+          <td>{{ request.end_date }}</td>
+          <td>{{ request.get_request_type_display }}</td>
+          <td>{{ request.get_request_status_display }}</td>
+          <td>{{ request.created_at|date:"d-m-Y" }}</td>
+          <td>{{ request.description }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
+
 {% endblock %}
