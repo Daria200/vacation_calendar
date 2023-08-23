@@ -274,7 +274,6 @@ def test_approve_or_reject_transfer_requests(
         },
     )
     assert response.status_code == 302
-    print("response", response)
 
     # Get the created request
     request = Request.objects.get(request_type=2, employee=employee)
@@ -292,6 +291,7 @@ def test_approve_or_reject_transfer_requests(
 
     # Check the updated request status
     updated_request = Request.objects.get(pk=request.id)
+
     assert updated_request.request_status == request_status
 
     # Check if vacation days are approved
@@ -328,3 +328,54 @@ def test_approve_or_reject_transfer_requests(
 
     # Check if available days are not further updated after rejection
     updated_available_days = AvailableDays.objects.get(employee=employee, year=2023)
+
+
+@pytest.mark.parametrize(
+    "start_date, end_date, request_status",
+    [
+        ("2023-09-19", "2023-09-21", 1),
+    ],
+)
+@pytest.mark.django_db
+def test_cancel_requests(client, employee_user, start_date, end_date, request_status):
+    employee = employee_user
+
+    available_days = AvailableDays.objects.create(
+        employee=employee, allotted_days=30, transferred_days=0, year=2023
+    )
+
+    available_days.save()
+
+    assert (
+        AvailableDays.objects.filter(employee=employee, year=2023).first().allotted_days
+        == 30
+    )
+    client.force_login(employee.user)
+
+    response = client.post(
+        reverse("vacation_request"),
+        {
+            "startdate": "2023-09-01",
+            "enddate": "2023-09-21",
+            "vacation_type": 1,
+            "length": 1.0,
+            "description": "Test vacation request",
+        },
+    )
+    assert VacationDay.objects.filter(employee=employee, date__year=2023).count() == 15
+    # Get the created request
+    request = Request.objects.get(request_type=1, employee=employee)
+    assert request.request_status == request_status
+
+    # Create a request to cancel days
+    response = client.post(
+        reverse("cancel_vacation_days"),
+        {
+            "startdate": start_date,
+            "enddate": end_date,
+            "description": "Some description",
+        },
+    )
+
+    assert Request.objects.get(request_type=3, employee=employee).request_status == 1
+    assert Request.objects.get(request_type=1, employee=employee).request_status == 1

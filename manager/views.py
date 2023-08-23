@@ -87,7 +87,6 @@ def transfer_days_requests(request):
 
         if action == "approve":
             start_year = start_date.year
-            print(employee)
             available_days_instance_next_year = AvailableDays.objects.get(
                 employee=employee,
                 year=start_year,

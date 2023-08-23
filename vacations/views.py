@@ -273,5 +273,56 @@ def transfer_days_request(request):
     return render(request, "employee_view/transfer_days_request.html")
 
 
+@login_required
 def cancel_vacation_days(request):
+    # check if the selected days exist in the database
+    # create the requst
+
+    if request.method == "POST":
+        user_id = request.user.id
+        employee = Employee.objects.get(user_id=user_id)
+
+        # Get form values from the form
+        startdate = request.POST["startdate"]
+        enddate = request.POST["enddate"]
+        description = request.POST.get("description")
+
+        # Get saved days in the database
+        start_date = datetime.datetime.strptime(startdate, "%Y-%m-%d").date()
+        end_date = datetime.datetime.strptime(enddate, "%Y-%m-%d").date()
+        start_year = start_date.year
+        vacation_days_saved_in_db = VacationDay.objects.filter(
+            employee=employee,
+            date__range=(start_date, end_date),
+        )
+        num_days = (end_date - start_date).days + 1
+        days_to_check = verify_days(
+            employee=employee,
+            start_date=start_date,
+            num_days=num_days,
+            start_year=start_year,
+        )
+
+        all_days_present = True
+
+        for day in days_to_check:
+            if not vacation_days_saved_in_db.filter(date=day).exists():
+                all_days_present = False
+                messages.error(request, f"You have not requested {day}")
+
+        if all_days_present:
+            with transaction.atomic():
+                Request.objects.create(
+                    employee=employee,
+                    start_date=startdate,
+                    end_date=enddate,
+                    description=description,
+                    request_type=3,
+                )
+            messages.success(
+                request,
+                f"You requested {len(days_to_check)} days to delete",
+            )
+
+        return redirect("cancel_vacation_days")
     return render(request, "employee_view/cancel_vacation_days.html")

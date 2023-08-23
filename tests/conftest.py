@@ -34,7 +34,7 @@ def employee_user():
         user=user,
         manager=manager_user,  # Assign the manager instance
         city=city,
-        is_manager=False,
+        is_manager=True,
     )
     return employee
 
