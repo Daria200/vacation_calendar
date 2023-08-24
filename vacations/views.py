@@ -73,13 +73,19 @@ def verify_days(
 
 @login_required
 def vacation_request(request):
-    # exclude saturdays and sundays, public holidays, save it in the database
-    # return error if:
-    #   the days are already in the database
-    #   the sum of requested + saved days exceed available days
+    """_summary_
+    Accepts a post request containing start_date, end_date, type and description of
+        a vacation request. Excludes weekends and public holidays. Saves days in the database
+        and a request with a status of pending.
+        Checks if requested days do not exceed allotted+transferred days for the year
+    Args:
+        request
 
-    # TODO: edge case
-    # A vacation can start in december and end in januar
+    Returns:
+        redirects to vacation_request
+    """
+
+    # TODO:
     # An employee can request 0.5 day
 
     if request.method == "POST":
@@ -92,7 +98,6 @@ def vacation_request(request):
         vacation_type = request.POST["vacation_type"]
         full_day = float(request.POST["length"])
         description = request.POST.get("description")
-        vacation_type = vacation_type
 
         # Get saved days in the database
         start_date = datetime.datetime.strptime(startdate, "%Y-%m-%d").date()
@@ -101,9 +106,15 @@ def vacation_request(request):
         vacation_days_saved_in_db = VacationDay.objects.filter(
             employee=employee, date__year=start_year
         )
+
+        num_of_vacation_days_saved_in_db = 0
+        for day in vacation_days_saved_in_db:
+            num_of_vacation_days_saved_in_db += day.full_day
+
         vacation_days_saved_in_db_list = [
             day.date.strftime("%Y-%m-%d") for day in vacation_days_saved_in_db
         ]
+
         # Check if the record is in the DB
         num_days = (end_date - start_date).days + 1
         for i in range(num_days):
@@ -112,6 +123,7 @@ def vacation_request(request):
                 messages.error(request, f"You already requested {current_date}")
                 return redirect("vacation_request")
 
+        # Excludes weekens and public holidays
         work_days = verify_days(
             employee,
             start_date,
@@ -131,6 +143,10 @@ def vacation_request(request):
                 )
             )
 
+        num_of_requested_days = 0
+        for day in vacation_instances:
+            num_of_requested_days += day.full_day
+
         # Check if the employee does not exceed the available days
         # Get number of available days for the employee
         available_days_instance = AvailableDays.objects.get(
@@ -142,8 +158,9 @@ def vacation_request(request):
             + available_days_instance.transferred_days
         )
 
-        if len(vacation_instances) > int(total_available_days) - len(
-            vacation_days_saved_in_db
+        if (
+            num_of_requested_days
+            > int(total_available_days) - num_of_vacation_days_saved_in_db
         ):
             messages.error(
                 request,

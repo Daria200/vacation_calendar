@@ -498,3 +498,52 @@ def test_approve_or_reject_cancel_requests(
 
     # # Check if available days are not further updated after rejection
     # updated_available_days = AvailableDays.objects.get(employee=employee, year=2023)
+
+
+@pytest.mark.parametrize(
+    "start_date, end_date, num_vacation_days_2023",
+    [
+        ("2023-01-02", "2023-01-15", 5),
+        ("2023-08-14", "2023-08-21", 3),
+        ("2023-08-01", "2023-09-15", 17),
+        ("2023-08-01", "2023-10-02", 22.5),
+    ],
+)
+@pytest.mark.django_db
+def test_vacation_requests_0_5_days(
+    client,
+    employee_user,
+    start_date,
+    end_date,
+    num_vacation_days_2023,
+):
+    employee = employee_user
+
+    available_days = AvailableDays.objects.create(
+        employee=employee, allotted_days=30, transferred_days=0, year=2023
+    )
+
+    assert (
+        AvailableDays.objects.filter(employee=employee, year=2023).first().allotted_days
+        == 30
+    )
+
+    client.force_login(employee.user)
+
+    response = client.post(
+        reverse("vacation_request"),
+        {
+            "startdate": start_date,
+            "enddate": end_date,
+            "vacation_type": 1,
+            "length": 0.5,
+            "description": "Test vacation request",
+        },
+    )
+    updated_vacation_days = VacationDay.objects.filter(
+        employee=employee, date__year=2023
+    )
+    num_of_days = 0
+    for day in updated_vacation_days:
+        num_of_days += day.full_day
+    assert num_of_days == num_vacation_days_2023
