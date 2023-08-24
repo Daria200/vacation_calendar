@@ -379,3 +379,122 @@ def test_cancel_requests(client, employee_user, start_date, end_date, request_st
 
     assert Request.objects.get(request_type=3, employee=employee).request_status == 1
     assert Request.objects.get(request_type=1, employee=employee).request_status == 1
+
+
+@pytest.mark.parametrize(
+    "request_status_vacation, action",
+    [
+        (1, "approve"),
+        (1, "reject"),
+    ],
+)
+@pytest.mark.django_db
+def test_approve_or_reject_cancel_requests(
+    client,
+    employee_user,
+    request_status_vacation,
+    action,
+):
+    employee = employee_user
+    #
+    AvailableDays.objects.create(
+        employee=employee, allotted_days=30, transferred_days=0, year=2023
+    )
+    available_days_2023 = AvailableDays.objects.get(employee=employee, year=2023)
+    assert available_days_2023.allotted_days == 30
+
+    client.force_login(employee.user)
+
+    response = client.post(
+        reverse("vacation_request"),
+        {
+            "startdate": "2023-09-01",
+            "enddate": "2023-09-21",
+            "vacation_type": 1,
+            "length": 1.0,
+            "description": "Test vacation request",
+        },
+    )
+    assert VacationDay.objects.filter(employee=employee, date__year=2023).count() == 15
+
+    # Get the created request
+    request = Request.objects.get(request_type=1, employee=employee)
+    assert request.request_status == 1
+
+    # Create a request to cancel days
+    response = client.post(
+        reverse("cancel_vacation_days"),
+        {
+            "startdate": "2023-09-10",
+            "enddate": "2023-09-21",
+            "description": "Some description",
+        },
+    )
+
+    requests = Request.objects.filter(employee=employee)
+    assert requests[0].request_status == request_status_vacation
+    assert requests[1].request_status == request_status_vacation
+
+    # Perform the action (reject)
+    response = client.post(
+        reverse("cancel_days_requests"),
+        {
+            "selected_request_id": 2,
+            "action": action,
+        },
+    )
+
+    if action == "approve":
+        assert (
+            VacationDay.objects.filter(employee=employee, date__year=2023).count() == 6
+        )
+        request = Request.objects.get(request_type=3, employee=employee)
+        assert request.request_status == 2
+        assert not VacationDay.objects.filter(
+            employee=employee, date__range=("2023-09-10", "2023-09-21")
+        ).exists()
+
+    elif action == "reject":
+        assert (
+            VacationDay.objects.filter(employee=employee, date__year=2023).count() == 15
+        )
+        request = Request.objects.get(request_type=3, employee=employee)
+        assert request.request_status == 3
+        assert VacationDay.objects.filter(
+            employee=employee, date__range=("2023-09-10", "2023-09-21")
+        ).exists()
+
+    # # Check if vacation days are approved
+    # vacation_days = VacationDay.objects.filter(
+    #     employee=employee, date__range=("2024-01-02", "2024-01-05")
+    # )
+    # assert all(vacation_day.approved for vacation_day in vacation_days)
+
+    # # Check if available days are updated
+    # updated_available_days = AvailableDays.objects.get(employee=employee, year=2023)
+    # assert updated_available_days.allotted_days == allotted_days_2023
+
+    # updated_available_days = AvailableDays.objects.get(employee=employee, year=2024)
+    # assert updated_available_days.transferred_days == transfer_days_2024
+
+    # # Perform the action (reject)
+    # response = client.post(
+    #     reverse("transfer_days_requests"),
+    #     {
+    #         "selected_request_id": request.id,
+    #         "action": "reject",
+    #     },
+    # )
+    # assert response.status_code == 302
+
+    # # Check the updated request status
+    # updated_request = Request.objects.get(pk=request.id)
+    # assert updated_request.request_status == 3
+
+    # # Check if vacation days are deleted
+    # assert not VacationDay.objects.filter(
+    #     employee=employee, date__range=("2024-01-02", "2024-01-05")
+    # ).exists()
+
+    # # Check if available days are not further updated after rejection
+    # updated_available_days = AvailableDays.objects.get(employee=employee, year=2023)

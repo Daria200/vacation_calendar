@@ -125,8 +125,44 @@ def transfer_days_requests(request):
     return render(request, "manager_view/transfer_days_requests.html", context)
 
 
+@user_passes_test(is_manager)
+@login_required
 def cancel_days_requests(request):
-    return render(request, "manager_view/delete_days_requests.html")
+    cancel_requests = Request.objects.filter(request_type=3, request_status=1)
+    context = {"cancel_requests": cancel_requests}
+    if request.method == "POST":
+        selected_request_id = request.POST["selected_request_id"]
+        action = request.POST["action"]
+
+        cancel_request_to_approve_or_reject = Request.objects.get(
+            pk=selected_request_id
+        )
+        employee = cancel_request_to_approve_or_reject.employee
+        start_date = cancel_request_to_approve_or_reject.start_date
+        end_date = cancel_request_to_approve_or_reject.end_date
+
+        vacation_days_to_approve_or_reject = VacationDay.objects.filter(
+            employee=employee,
+            date__range=(start_date, end_date),
+        )
+
+        if action == "approve":
+            with transaction.atomic():
+                # Set the request status to apptove
+                # Delete the days from the DB
+                vacation_days_to_approve_or_reject.delete()
+                cancel_request_to_approve_or_reject.request_status = 2
+                cancel_request_to_approve_or_reject.save()
+                messages.success(request, f"The request has been approved")
+
+        elif action == "reject":
+            # Set the request status to rejected
+            with transaction.atomic():
+                cancel_request_to_approve_or_reject.request_status = 3
+                cancel_request_to_approve_or_reject.save()
+                messages.success(request, f"The request has been rejected")
+
+    return render(request, "manager_view/delete_days_requests.html", context)
 
 
 def hr_view(request):
