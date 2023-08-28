@@ -45,6 +45,12 @@ def dashboard(request):
     all_requests = Request.objects.filter(
         employee=employee, start_date__year=current_year
     )
+    transfer_requests = Request.objects.filter(
+        employee=employee, start_date__year=current_year + 1, request_type=2
+    )
+
+    # Combine querysets using the OR operator
+    combined_requests = all_requests | transfer_requests
     vacation_days_saved_in_db_this_year = VacationDay.objects.filter(
         employee=employee, date__year=current_year
     )
@@ -60,7 +66,7 @@ def dashboard(request):
     usage = round((num_of_vac_days / all_available_days) * 100)
 
     context = {
-        "all_requests": all_requests,
+        "all_requests": combined_requests,
         "num_of_vac_days": num_of_vac_days,
         "all_available_days": all_available_days,
         "num_of_alloted_days": num_of_alloted_days,
