@@ -204,7 +204,7 @@ def hr_view(request):
                 vacation_day.employee.id
             ] += vacation_day.full_day
 
-    employees = employees.select_related("user")
+    # Get available days
 
     for employee in employees:
         setattr(
@@ -217,7 +217,7 @@ def hr_view(request):
             "total_approved_days",
             employee_id_to_approved_days.get(employee.id, 0),
         )
-
+    employees = employees.select_related("user")
     context = {
         "managers": managers,
         "cities": cities,

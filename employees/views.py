@@ -17,6 +17,9 @@ def register(request):
         password2 = request.POST["password2"].strip()
         city_name = request.POST["city"]
         manager_id = request.POST["manager"]
+        start_date = request.POST["start_date"]
+        employment_type = request.POST["employment_type"]
+
         # TODO: validate the manager is in fact a user with is_manager=True
         manager = get_object_or_404(User, id=manager_id)
         city = get_object_or_404(City, name=city_name)
@@ -43,6 +46,9 @@ def register(request):
                 manager=manager,
                 city=city,
                 is_manager=False,
+                start_date=start_date,
+                employment_type=employment_type
+
             )
         # login after register
         auth.login(request, user)
