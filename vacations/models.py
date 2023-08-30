@@ -49,7 +49,7 @@ class AvailableDays(models.Model):
     employee = models.ForeignKey(
         Employee, on_delete=models.CASCADE, related_name="available_days"
     )
-    allotted_days = models.IntegerField(default=30)
+    allotted_days = models.DecimalField(max_digits=3, decimal_places=1, default=30.0)
     transferred_days = models.IntegerField(default=0)
     # TODO: make sure this is the year in which
     year = models.IntegerField(default=datetime.datetime.now().year, editable=True)

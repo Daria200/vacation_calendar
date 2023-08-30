@@ -39,7 +39,9 @@ def register(request):
         current_year = date.today().year
         start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
         if start_date.year == current_year:
-            num_of_days = start_date.month * 30 / 12
+            end_of_year = date(current_year, 12, 31)
+            days_left = (end_of_year - start_date).days + 1
+            num_of_days = days_left * 30 / 365
         else:
             num_of_days = 30
 
