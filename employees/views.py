@@ -1,9 +1,12 @@
+from datetime import date, datetime
+
 from django.contrib import auth, messages
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .models import City, Employee
+from vacations.models import AvailableDays
 
 
 def register(request):
@@ -17,7 +20,7 @@ def register(request):
         password2 = request.POST["password2"].strip()
         city_name = request.POST["city"]
         manager_id = request.POST["manager"]
-        start_date = request.POST["start_date"]
+        start_date_str = request.POST["start_date"]
         employment_type = request.POST["employment_type"]
 
         # TODO: validate the manager is in fact a user with is_manager=True
@@ -33,6 +36,13 @@ def register(request):
             messages.error(request, "User with this email is already registered")
             return redirect("register")
 
+        current_year = date.today().year
+        start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+        if start_date.year == current_year:
+            num_of_days = start_date.month * 30 / 12
+        else:
+            num_of_days = 30
+
         with transaction.atomic():
             user = User.objects.create_user(
                 username=email,
@@ -41,14 +51,16 @@ def register(request):
                 first_name=first_name,
                 last_name=last_name,
             )
-            Employee.objects.create(
+            employee = Employee.objects.create(
                 user=user,
                 manager=manager,
                 city=city,
                 is_manager=False,
-                start_date=start_date,
-                employment_type=employment_type
-
+                start_date=start_date_str,
+                employment_type=employment_type,
+            )
+            AvailableDays.objects.create(
+                employee=employee, allotted_days=num_of_days, year=current_year
             )
         # login after register
         auth.login(request, user)
