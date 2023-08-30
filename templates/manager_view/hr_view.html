@@ -1,6 +1,108 @@
-{% extends 'manager_view/manager_base.html' %} 
-{% block content %}
+{% extends 'manager_view/manager_base.html' %} {% block content %}
 <div class="container">
-    <h1>Hr view</h1>
+  <!-- Showcase -->
+  <section id="showcase">
+    <div class="container text-center">
+      <div class="home-search">
+        <div class="overlay p-3">
+          <div class="search">
+            <form id="vacation-form" action="{% url 'hr_view'  %}">
+              <!-- Form Row 1 -->
+              <div class="form-row">
+                <div class="col-md-3 mb-3">
+                  <label class="sr-only">Employee Name</label>
+                  <input
+                    type="text"
+                    name="employee_name"
+                    class="form-control"
+                    placeholder="Employee Name"
+                  />
+                </div>
+
+                <div class="col-md-3 mb-3">
+                  <label class="sr-only">Year</label>
+                  <input
+                    type="text"
+                    name="year"
+                    class="form-control"
+                    placeholder="{{ year }}"
+                  />
+                </div>
+
+                <div class="col-md-3 mb-3">
+                  <label class="sr-only">Manager</label>
+                  <select name="manager" class="form-control">
+                    <option selected="true" disabled="disabled">
+                      Manager (All)
+                    </option>
+                    {% for manager in managers %}
+                    <option value="{{ manager.id }}">
+                      {{ manager.user.first_name }} {{manager.user.last_name }}
+                    </option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                  <label class="sr-only">City</label>
+                  <select name="city" class="form-control">
+                    <option selected="true" disabled="disabled">
+                      City (All)
+                    </option>
+                    {% for city in cities %}
+                    <option value="{{ city.id }}">{{ city.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              <button class="btn btn-secondary btn-block mt-4" type="submit">
+                Search
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section id="employees">
+    <div class="container">
+      <table class="table">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">Employee</th>
+            <th scope="col">Allotted</th>
+            <th scope="col">Transfrred</th>
+            <th scope="col">Total</th>
+            <th scope="col">Open</th>
+            <th scope="col">Pending</th>
+            <th scope="col">Approved</th>
+            <th scope="col">Manager</th>
+            <th scope="col">City</th>
+            <th scope="col">Type</th>
+            <th scope="col">Special</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for employee in employees %}
+          <tr>
+            <td>
+              {{ employee.user.first_name }} {{ employee.user.last_name }}
+            </td>
+            <td>{{ employee.total_allotted }}</td>
+            <td>{{ employee.total_transferred }}</td>
+            <td>{{ employee.total_vacation_days }}</td>
+            <td>5</td>
+            <td>10</td>
+            <td>{{ employee.total_approved_days }}</td>
+            <td>Abi</td>
+            <td>Frankfurt</td>
+            <td>Fulltime</td>
+            <td>0</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
 </div>
+
 {% endblock %}

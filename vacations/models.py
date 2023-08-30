@@ -7,7 +7,9 @@ from employees.models import City, Employee
 
 class VacationDay(models.Model):
     TYPE_CHOICES = ((1, "Vacation"), (2, "Special leave"))
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    employee = models.ForeignKey(
+        Employee, on_delete=models.CASCADE, related_name="vacation_days"
+    )
     date = models.DateField()
 
     # An employee can have half a day off, by default it a full day
@@ -44,9 +46,11 @@ class PublicHolidays(models.Model):
 
 # TODO: rename AvailableDay. Use singular names, not plural, for model names
 class AvailableDays(models.Model):
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    employee = models.ForeignKey(
+        Employee, on_delete=models.CASCADE, related_name="available_days"
+    )
     allotted_days = models.IntegerField(default=30)
-    transferred_days = models.DecimalField(default=0, max_digits=4, decimal_places=1)
+    transferred_days = models.IntegerField(default=0)
     # TODO: make sure this is the year in which
     year = models.IntegerField(default=datetime.datetime.now().year, editable=True)
 
@@ -62,7 +66,9 @@ class Request(models.Model):
     TYPES = ((1, "vacation"), (2, "transfer"), (3, "cancel"))
     STATUS_OPTIONS = ((1, "pending"), (2, "approved"), (3, "rejected"))
 
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    employee = models.ForeignKey(
+        Employee, on_delete=models.CASCADE, related_name="requests"
+    )
     start_date = models.DateField()
     end_date = models.DateField()
     description = models.TextField(max_length=200, null=True, blank=True)

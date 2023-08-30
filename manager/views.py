@@ -1,13 +1,13 @@
+import datetime
+
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, Q, Sum
 from django.shortcuts import redirect, render
 
+from employees.models import City, Employee
 from vacations.models import AvailableDays, Request, VacationDay
-from vacations.views import verify_days
-
-from django.contrib.auth.decorators import user_passes_test
 
 
 def is_manager(user):
@@ -54,7 +54,7 @@ def vacation_requests(request):
                 messages.success(request, f"The request has been rejected")
 
         return redirect("vacation_requests")
-
+    employees = employees.select_related("user")
     return render(request, "manager_view/vacation_days_requests.html", context)
 
 
@@ -122,6 +122,7 @@ def transfer_days_requests(request):
                 messages.success(request, f"The request has been rejected")
 
         return redirect("transfer_days_requests")
+    employees = employees.select_related("user")
     return render(request, "manager_view/transfer_days_requests.html", context)
 
 
@@ -161,12 +162,69 @@ def cancel_days_requests(request):
                 cancel_request_to_approve_or_reject.request_status = 3
                 cancel_request_to_approve_or_reject.save()
                 messages.success(request, f"The request has been rejected")
-
+    employees = employees.select_related("user")
     return render(request, "manager_view/delete_days_requests.html", context)
 
 
+@user_passes_test(is_manager)
+@login_required
 def hr_view(request):
-    return render(request, "manager_view/hr_view.html")
+    managers = Employee.objects.filter(is_manager=True)
+    cities = City.objects.all()
+
+    employee_name = request.GET.get("employee_name")
+    year = request.GET.get("year", datetime.date.today().year)
+    manager_id = request.GET.get("manager")
+    city_id = request.GET.get("city")
+
+    employees = Employee.objects.all()
+
+    if employee_name:
+        employees = employees.filter(
+            Q(user__first_name__icontains=employee_name)
+            | Q(user__last_name__icontains=employee_name)
+        )
+    if manager_id:
+        employees = employees.filter(manager_id=manager_id)
+    if city_id:
+        employees = employees.filter(city_id=city_id)
+
+    # Get vacation days
+    vacation_days = VacationDay.objects.filter(date__year=year, employee__in=employees)
+    employee_id_to_vacation_days = {}
+    employee_id_to_approved_days = {}
+
+    for vacation_day in vacation_days:
+        if vacation_day.employee.id not in employee_id_to_vacation_days:
+            employee_id_to_vacation_days[vacation_day.employee.id] = 0
+            employee_id_to_approved_days[vacation_day.employee.id] = 0
+        employee_id_to_vacation_days[vacation_day.employee.id] += vacation_day.full_day
+        if vacation_day.approved:
+            employee_id_to_approved_days[
+                vacation_day.employee.id
+            ] += vacation_day.full_day
+
+    employees = employees.select_related("user")
+
+    for employee in employees:
+        setattr(
+            employee,
+            "total_vacation_days",
+            employee_id_to_vacation_days.get(employee.id, 0),
+        )
+        setattr(
+            employee,
+            "total_approved_days",
+            employee_id_to_approved_days.get(employee.id, 0),
+        )
+
+    context = {
+        "managers": managers,
+        "cities": cities,
+        "employees": employees,
+        "year": year,
+    }
+    return render(request, "manager_view/hr_view.html", context)
 
 
 def manager_view_monthly(request):
