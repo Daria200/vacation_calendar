@@ -45,30 +45,13 @@
       href="{% url 'manager_view_total' %}">Total</a>
 
       <a 
-      {% if '/manager/vacation_requests' == request.path %}
+      {% if '/manager/requests' == request.path %}
         class="active"
       {% else %
         class=""}    
       {% endif %} 
-      href="{% url 'vacation_requests' %}">Vacation requests</a>
+      href="{% url 'requests' %}">All requests</a>
 
-      <a 
-      {% if '/manager/transfer_days_requests' == request.path %}
-        class="active"
-      {% else %
-        class=""}    
-      {% endif %} 
-      href="{% url 'transfer_days_requests' %}">Transfer days requests</a>
-
-      <a 
-      {% if '/manager/cancel_days_requests' == request.path %}
-        class="active"
-      {% else %
-        class=""}    
-      {% endif %} 
-      href="{% url 'cancel_days_requests' %}">Cancel days requests</a>
-
-      <!-- TODO: make it work -->
       <a href="javascript:{document.getElementById('logout').submit()}">log out</a>
       <form action="{% url 'logout' %}" method="POST" id="logout">
         {% csrf_token %}
