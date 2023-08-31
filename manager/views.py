@@ -16,6 +16,14 @@ def is_manager(user):
 
 @user_passes_test(is_manager)
 @login_required
+def requests(request):
+    all_requests = Request.objects.filter(request_status=1)
+    context = {"all_requests": all_requests}
+    return render(request, "manager_view/requests.html", context)
+
+
+@user_passes_test(is_manager)
+@login_required
 def vacation_requests(request):
     vacation_requests = Request.objects.filter(request_type=1, request_status=1)
     context = {"vacation_requests": vacation_requests}
@@ -54,7 +62,7 @@ def vacation_requests(request):
                 messages.success(request, f"The request has been rejected")
 
         return redirect("vacation_requests")
-    employees = employees.select_related("user")
+    # employees = employees.select_related("user")
     return render(request, "manager_view/vacation_days_requests.html", context)
 
 
