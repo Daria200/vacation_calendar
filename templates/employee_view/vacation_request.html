@@ -2,10 +2,8 @@
 <div class="container">
   <div class="row text-center">
     <div class="col-md-12">
-      <div id="alert-container"></div>
-
-      <!-- Alerts -->
-      {% include '_alerts.html' %}
+      <div id="alert-container">{% include '_alerts.html' %}</div>
+      
       <form
         id="vacation-form"
         action="{% url 'vacation_request'  %}"

@@ -63,12 +63,8 @@
     <!-- Main BLock -->
 {% block content %} {% endblock %}
 <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
-<script>
-  $(document).ready(function() {
-    $('#check-all').on('click', function() {
-      $('.request-checkbox').prop('checked', this.checked);
-    });
-  });
-</script>
+<script src="{% static 'js/popper.js' %}"></script>
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
 </body>
 </html>

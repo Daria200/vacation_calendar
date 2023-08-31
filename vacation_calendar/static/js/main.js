@@ -32,4 +32,4 @@
 
 setTimeout(function () {
   $("#message").fadeOut("slow");
-}, 5000);
+}, 4000);
