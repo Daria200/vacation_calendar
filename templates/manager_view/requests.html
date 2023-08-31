@@ -25,7 +25,7 @@
           </td>
           <td>{{ request.start_date }}</td>
           <td>{{ request.end_date }}</td>
-          <td>{{ request.request_type }}</td>
+          <td>{{ request.get_request_type_display }}</td>
           <td>{{ request.description }}</td>
           <td>{{ request.created_at|date:"d-m-Y" }}</td>
           <td>
@@ -54,6 +54,41 @@
     />
     <input type="hidden" name="action" id="selected-action" value="" />
   </form>
+  <nav>
+    {% if all_requests.has_other_pages %}
+      <ul class="pagination">
+        {% if all_requests.has_previous  %}
+          <li class="page-item">
+            <a href="?page={{all_requests.previous_page_number}}" class="page-link">&laquo;</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled">
+              <a class="page-link">&laquo;</a>
+          </li>
+        {% endif %}
+        {% for i in all_requests.paginator.page_range %}
+          {% if all_requests.number == i %}
+            <li class="page-item active">
+              <a class="page-link">{{i}}</a>
+            </li>
+          {% else %}
+            <li class="page-item">
+              <a href="?page={{i}}" class="page-link">{{i}}</a>
+            </li>
+          {% endif %}
+        {% endfor %}
+        {% if all_requests.has_next %}
+        <li class="page-item">
+          <a href="?page={{all_requests.next_page_number}}" class="page-link">&raquo;</a>
+        </li>
+        {% else %}
+          <li class="page-item disabled">
+            <a class="page-link">&raquo;</a>
+          </li>
+        {% endif %}
+      </ul>
+    {% endif %}
+  </nav>
 </div>
 <script>
   document.addEventListener("DOMContentLoaded", function () {

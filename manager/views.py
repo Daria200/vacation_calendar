@@ -1,5 +1,6 @@
 import datetime
 
+from django.core.paginator import Paginator
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction
@@ -17,8 +18,12 @@ def is_manager(user):
 @user_passes_test(is_manager)
 @login_required
 def requests(request):
+    TYPE_LABELS = {1: "Vacation", 2: "Transfer", 3: "Cancel", 4: "Remote Work"}
     all_requests = Request.objects.filter(request_status=1)
-    context = {"all_requests": all_requests}
+    paginator = Paginator(all_requests, 20)
+    page = request.GET.get("page")
+    paged_requests = paginator.get_page(page)
+    context = {"all_requests": paged_requests}
     return render(request, "manager_view/requests.html", context)
 
 
