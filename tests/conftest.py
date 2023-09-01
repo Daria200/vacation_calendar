@@ -22,6 +22,8 @@ def employee_user():
         user=manager_user,
         city=city,
         is_manager=True,
+        employment_type = 1,
+        start_date = "2020-01-02"
     )
 
     # Create a regular employee instance and assign the manager
@@ -35,6 +37,8 @@ def employee_user():
         manager=manager_user,  # Assign the manager instance
         city=city,
         is_manager=True,
+        employment_type = 1,
+        start_date = "2020-01-02"
     )
     return employee
 
@@ -74,6 +78,8 @@ def available_days(manager_user):
         user=manager_user,
         city=city,
         is_manager=True,
+        employment_type = 1,
+        start_date = "2020-01-02"
     )
     available_days = AvailableDays.objects.create(
         employee=manager_employee,
