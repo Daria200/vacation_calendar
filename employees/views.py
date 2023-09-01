@@ -42,6 +42,7 @@ def register(request):
             end_of_year = date(current_year, 12, 31)
             days_left = (end_of_year - start_date).days + 1
             num_of_days = days_left * 30 / 365
+            num_of_days = round(num_of_days * 2) / 2
         else:
             num_of_days = 30
 
