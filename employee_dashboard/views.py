@@ -40,20 +40,31 @@ def dashboard(request):
 
     user_id = request.user.id
     employee = Employee.objects.get(user_id=user_id)
+    years = AvailableDays.objects.filter(employee=employee).values_list('year', flat=True).distinct()
     current_year = date.today().year
 
-    all_requests = Request.objects.filter(
+    if request.method == "POST":
+        print(request.POST)
+        current_year =int(request.POST["year"])
+
+    all_requests_this_year = Request.objects.filter(
         employee=employee, start_date__year=current_year
     )
-    transfer_requests = Request.objects.filter(
+    transfer_requests_next_year = Request.objects.filter(
         employee=employee, start_date__year=current_year + 1, request_type=2
     )
-
-    # Combine querysets using the OR operator
-    combined_requests = all_requests | transfer_requests
+    # if not transfer_requests_next_year.exists():
+    #     transfer_requests_next_year = None
+    
+    if transfer_requests_next_year:
+        # Combine querysets using the OR operator
+        all_requests = all_requests_this_year | transfer_requests_next_year
+    else:
+        all_requests = all_requests_this_year
     vacation_days_saved_in_db_this_year = VacationDay.objects.filter(
-        employee=employee, date__year=current_year
-    )
+            employee=employee, date__year=current_year
+        )
+    
 
     num_of_vac_days = len(vacation_days_saved_in_db_this_year)
     available_days_instance = AvailableDays.objects.get(
@@ -66,12 +77,14 @@ def dashboard(request):
     usage = round((num_of_vac_days / all_available_days) * 100)
 
     context = {
-        "all_requests": combined_requests,
+        "all_requests": all_requests,
         "num_of_vac_days": num_of_vac_days,
         "all_available_days": all_available_days,
         "num_of_alloted_days": num_of_alloted_days,
         "num_of_transferred_days": num_of_transferred_days,
         "days_left_this_year": days_left_this_year,
         "usage": usage,
+        "years": years,
+        "current_year": current_year,
     }
     return render(request, "employee_view/dashboard.html", context)
