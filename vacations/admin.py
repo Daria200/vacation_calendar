@@ -3,12 +3,7 @@ import calendar
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
-from .models import (
-    AvailableDays,
-    PublicHolidays,
-    VacationDay,
-    Request,
-)
+from .models import AvailableDays, PublicHolidays, VacationDay, Request, RemoteDay
 
 
 class MonthFilter(admin.SimpleListFilter):
@@ -70,6 +65,7 @@ class AvailableDaysAdmin(admin.ModelAdmin):
         "year",
         "allotted_days",
         "transferred_days",
+        "remote_work_days",
     ]
     list_filter = ["employee__user__last_name", "year"]
     search_fields = ["employee__user__last_name", "employee__user__first_name"]
@@ -103,7 +99,26 @@ class RequestAdmin(admin.ModelAdmin):
         return obj.employee.user.last_name
 
 
+class RemoteDayAdmin(admin.ModelAdmin):
+    list_display = [
+        "employee_name",
+        "employee_surname",
+        "date",
+        "approved",
+    ]
+    list_filter = ["employee__user__last_name"]
+    search_fields = ["employee__user__last_name", "employee__user__first_name"]
+    list_display_links = ["employee_name", "employee_surname"]
+
+    def employee_name(self, obj):
+        return obj.employee.user.first_name
+
+    def employee_surname(self, obj):
+        return obj.employee.user.last_name
+
+
 admin.site.register(VacationDay, VacationDayAdmin)
 admin.site.register(PublicHolidays, PublicHolidaysAdmin)
 admin.site.register(AvailableDays, AvailableDaysAdmin)
 admin.site.register(Request, RequestAdmin)
+admin.site.register(RemoteDay, RemoteDayAdmin)

@@ -99,7 +99,7 @@
               class="menu-item"
             {% endif %}>
               <a href="{% url 'transfer_days_request' %}">
-                <i class="fa-solid fa-plus" style="color: #ffffff"></i>
+                <i class="fa-solid fa-arrow-down-up-across-line" style="color: #ffffff"></i>
                 Transfer days
               </a>
             </li>
@@ -112,6 +112,17 @@
               <a href="{% url 'cancel_vacation_days' %}">
                 <i class="fa-solid fa-trash-can" style="color: #ffffff"></i>
                 Cancel vacation days
+              </a>
+            </li>
+            <li
+            {% if '/remote_work_request' == request.path %}
+              class="menu-item active-link"
+            {% else %}
+              class="menu-item"
+            {% endif %}>
+              <a href="{% url 'remote_work_request' %}">
+                <i class="fa-solid fa-house-laptop" style="color: #ffffff"></i>
+                Request remote work
               </a>
             </li>
             <!-- Add jinja to show the button only to managers -->

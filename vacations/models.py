@@ -83,3 +83,4 @@ class RemoteDay(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
     date = models.DateField()
     description = models.TextField(max_length=200, null=True, blank=True)
+    approved = models.BooleanField(default=False)
