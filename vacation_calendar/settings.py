@@ -32,7 +32,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "employees",
-    "calendarapp",
+    "employee_dashboard",
     "vacations",
     "manager",
 ]
