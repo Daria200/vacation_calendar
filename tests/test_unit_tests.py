@@ -1,8 +1,6 @@
 import datetime
+
 import pytest
-
-from vacations.views import verify_days
-
 from django.contrib.auth.models import User
 from django.test import Client
 from django.urls import reverse
@@ -10,6 +8,7 @@ from parameterized import parameterized
 
 from employees.models import City, Employee
 from vacations.models import AvailableDays, Request, VacationDay
+from vacations.views import verify_days
 
 
 @pytest.fixture
@@ -68,4 +67,5 @@ def test_verify_days(client, employee_user):
         num_days,
         current_year,
     )
+
     assert len(days_to_save_in_db) == 7

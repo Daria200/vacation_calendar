@@ -38,7 +38,7 @@ def verify_days(
     # Get public holidays for this year
     public_holidays_this_year = PublicHolidays.objects.filter(
         cities=employee.city,
-        date__year=start_year,
+        date__year=year,
         every_year=False,
     )
     # Get public holidays that happen every year
@@ -54,7 +54,7 @@ def verify_days(
 
     # Add public holidays that happen every year to the set, adjusting the year to the current year
     for holiday in public_holidays_every_year:
-        current_date = date(start_year, holiday.date.month, holiday.date.day)
+        current_date = date(year, holiday.date.month, holiday.date.day)
         public_holidays_set.add(current_date)
 
     work_days = []
@@ -98,13 +98,18 @@ def vacation_request(request):
         vacation_type = request.POST["vacation_type"]
         duration = float(request.POST["length"])
         description = request.POST.get("description")
+        vacation_type = vacation_type
 
         # Get saved days in the database
         start_date = datetime.datetime.strptime(startdate, "%Y-%m-%d").date()
         end_date = datetime.datetime.strptime(enddate, "%Y-%m-%d").date()
         start_year = start_date.year
-        vacation_days_saved_in_db = VacationDay.objects.filter(
-            employee=employee, date__year=start_year
+        end_year = end_date.year
+
+        spans_multi_years = start_year != end_year
+
+        vacation_days_saved_in_db = list(
+            VacationDay.objects.filter(employee=employee, date__year=start_year)
         )
 
         num_of_vacation_days_saved_in_db = 0
@@ -149,13 +154,11 @@ def vacation_request(request):
 
         # Check if the employee does not exceed the available days
         # Get number of available days for the employee
-        available_days_instance = AvailableDays.objects.get(
-            employee=employee, year=start_year
-        )
+        available_days = AvailableDays.objects.get(employee=employee, year=start_year)
+
         # Calculate total available days (allotted+transferred)
         total_available_days = (
-            available_days_instance.allotted_days
-            + available_days_instance.transferred_days
+            available_days.allotted_days + available_days.transferred_days
         )
 
         if (
