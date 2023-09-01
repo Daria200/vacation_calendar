@@ -73,5 +73,7 @@ def dashboard(request):
         "num_of_transferred_days": num_of_transferred_days,
         "days_left_this_year": days_left_this_year,
         "usage": usage,
+        "years": [2022, 2023, 2024],
+        "current_year": current_year,
     }
     return render(request, "employee_view/dashboard.html", context)
