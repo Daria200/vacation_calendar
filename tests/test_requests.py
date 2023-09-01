@@ -545,5 +545,5 @@ def test_vacation_requests_0_5_days(
     )
     num_of_days = 0
     for day in updated_vacation_days:
-        num_of_days += day.full_day
+        num_of_days += day.duration
     assert num_of_days == num_vacation_days_2023

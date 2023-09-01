@@ -19,7 +19,7 @@ class VacationDay(models.Model):
         (0.5, "0.5"),
     )
 
-    full_day = models.DecimalField(
+    duration = models.DecimalField(
         default=1,
         max_digits=2,
         decimal_places=1,

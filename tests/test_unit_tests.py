@@ -53,7 +53,7 @@ def test_verify_days(client, employee_user):
     end_date = datetime.date(year=2023, month=10, day=16)  # "2023-10-16"
     num_days = 11
     current_year = 2023
-    full_day = 1.0
+    duration = 1.0
     vacation_type = 1
     description = "some"
     days_to_save_in_db = verify_days(
@@ -62,7 +62,7 @@ def test_verify_days(client, employee_user):
         end_date,
         num_days,
         current_year,
-        full_day,
+        duration,
         vacation_type,
         description,
     )

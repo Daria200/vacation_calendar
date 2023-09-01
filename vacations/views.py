@@ -96,7 +96,7 @@ def vacation_request(request):
         startdate = request.POST["startdate"]
         enddate = request.POST["enddate"]
         vacation_type = request.POST["vacation_type"]
-        full_day = float(request.POST["length"])
+        duration = float(request.POST["length"])
         description = request.POST.get("description")
 
         # Get saved days in the database
@@ -109,7 +109,7 @@ def vacation_request(request):
 
         num_of_vacation_days_saved_in_db = 0
         for day in vacation_days_saved_in_db:
-            num_of_vacation_days_saved_in_db += day.full_day
+            num_of_vacation_days_saved_in_db += day.duration
 
         vacation_days_saved_in_db_list = [
             day.date.strftime("%Y-%m-%d") for day in vacation_days_saved_in_db
@@ -136,7 +136,7 @@ def vacation_request(request):
                 VacationDay(
                     employee=employee,
                     date=day,
-                    full_day=full_day,
+                    duration=duration,
                     approved=False,
                     type=vacation_type,
                     description=description,
@@ -145,7 +145,7 @@ def vacation_request(request):
 
         num_of_requested_days = 0
         for day in vacation_instances:
-            num_of_requested_days += day.full_day
+            num_of_requested_days += day.duration
 
         # Check if the employee does not exceed the available days
         # Get number of available days for the employee
@@ -194,7 +194,7 @@ def transfer_days_request(request):
         startdate = request.POST["startdate"]
         enddate = request.POST["enddate"]
         vacation_type = 1
-        full_day = "1.0"
+        duration = "1.0"
         description = request.POST.get("description")
 
         # Get saved days in the database
@@ -266,7 +266,7 @@ def transfer_days_request(request):
                     VacationDay(
                         employee=employee,
                         date=day,
-                        full_day=full_day,
+                        duration=duration,
                         approved=False,
                         type=vacation_type,
                         description=description,

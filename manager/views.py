@@ -156,11 +156,11 @@ def hr_view(request):
         if vacation_day.employee.id not in employee_id_to_vacation_days:
             employee_id_to_vacation_days[vacation_day.employee.id] = 0
             employee_id_to_approved_days[vacation_day.employee.id] = 0
-        employee_id_to_vacation_days[vacation_day.employee.id] += vacation_day.full_day
+        employee_id_to_vacation_days[vacation_day.employee.id] += vacation_day.duration
         if vacation_day.approved:
             employee_id_to_approved_days[
                 vacation_day.employee.id
-            ] += vacation_day.full_day
+            ] += vacation_day.duration
 
     # Get available days
 
