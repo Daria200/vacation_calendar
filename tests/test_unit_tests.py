@@ -27,6 +27,8 @@ def employee_user():
         user=manager_user,
         city=city,
         is_manager=True,
+        employment_type=1,
+        start_date="2020-01-02",
     )
 
     # Create a regular employee instance and assign the manager
@@ -37,11 +39,19 @@ def employee_user():
     )
     employee = Employee.objects.create(
         user=user,
-        manager=manager_user,  # Assign the manager instance
+        manager=manager_user,
         city=city,
         is_manager=False,
+        employment_type=1,
+        start_date="2020-01-02",
     )
+
     return employee
+
+    # employee: Employee,
+    # start_date: date,
+    # num_days: int,
+    # start_year: int,
 
 
 @pytest.mark.django_db
@@ -49,21 +59,13 @@ def test_verify_days(client, employee_user):
     employee = employee_user
     # 7 work days
     start_date = datetime.date(year=2023, month=10, day=6)  # "2023-10-06"
-    end_date = datetime.date(year=2023, month=10, day=16)  # "2023-10-16"
     num_days = 11
     current_year = 2023
-    duration = 1.0
-    vacation_type = 1
-    description = "some"
-    start_year = 2023
     days_to_save_in_db = verify_days(
         employee,
         start_date,
         num_days,
         current_year,
-        duration,
-        vacation_type,
-        description,
     )
 
     assert len(days_to_save_in_db) == 7
