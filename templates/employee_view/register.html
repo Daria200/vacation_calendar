@@ -1,85 +1,104 @@
-{% extends 'employee_view/register_login_base.html' %}
-{% load static %}
-{% block content %} 
-  <div class="form-holder">
-    <div class="form-content">
-      <div class="form-items">
-        <h3>System Verification Vacation App</h3>
-        <p>Register</p>
+{% extends 'employee_view/register_login_base.html' %} {% load static %} 
+{% block content %}
+<div class="form-holder">
+  <div class="form-content">
+    <div class="form-items">
+      <h2>System Verification </h2>
+      <h3>Vacation App</h3>
+      <p>Register</p>
 
-        <div class="page-links">
-          <a href="{% url 'login' %}">Login</a
-          ><a href="{% url 'register' %}" class="active">Register</a>
-        </div>
-        <!-- Alerts -->
-        {% include '_alerts.html' %}
-        <form action="{% url 'register'  %}" method="POST">
-          {% csrf_token %}
-          <input
-            class="form-control"
-            type="text"
-            name="first_name"
-            placeholder="Name"
-            required
-          />
-          <input
-            class="form-control"
-            type="text"
-            name="last_name"
-            placeholder="Surname"
-            required
-          />
-          <input
-            class="form-control"
-            type="email"
-            name="email"
-            placeholder="E-mail Address"
-            required
-          />
+      <div class="page-links">
+        <a href="{% url 'login' %}">Login</a
+        ><a href="{% url 'register' %}" class="active">Register</a>
+      </div>
+      <!-- Alerts -->
+      {% include '_alerts.html' %}
+      <form action="{% url 'register'  %}" method="POST">
+        {% csrf_token %}
+        <input
+          class="form-control"
+          type="text"
+          name="first_name"
+          placeholder="Name"
+          required
+        />
+        <input
+          class="form-control"
+          type="text"
+          name="last_name"
+          placeholder="Surname"
+          required
+        />
+        <input
+          class="form-control"
+          type="email"
+          name="email"
+          placeholder="E-mail Address"
+          required
+        />
 
-          <input
-            class="form-control"
-            type="password"
-            name="password"
-            placeholder="Password"
-            required
-          />
-          <input
-            class="form-control"
-            type="password"
-            name="password2"
-            placeholder="Password"
-            required
-          />
-          <div class="col-md-12 mb-2" style="padding: 0" required>
-            <label class="">Choose your city</label>
-            <select id="city" name="city" class="form-control" required>
-              {% for city in cities %}
-              <option value="{{ city.name }}">{{ city.name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="col-md-12 mb-2" style="padding: 0">
-            <label class="">Choose your manager</label>
-            <select name="manager" class="form-control" required>
-              {% for manager in managers %}
-              <option value="{{ manager.user.id }}">
-                {{ manager.user.first_name }} {{ manager.user.last_name }}
-              </option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="form-button">
-            <button id="submit" type="submit" class="ibtn">
-              Register
-            </button>
-          </div>
-        </form>
-        <div class="other-links">
-          <span>Or register with</span><a href="#">Facebook</a
-          ><a href="#">Google</a><a href="#">Linkedin</a>
+        <input
+          class="form-control"
+          type="password"
+          name="password"
+          placeholder="Password"
+          required
+        />
+        <input
+          class="form-control"
+          type="password"
+          name="password2"
+          placeholder="Password"
+          required
+        />
+        <div class="col-md-12 mb-2" style="padding: 0" required>
+          <label class="">Choose your city</label>
+          <select id="city" name="city" class="form-control" required>
+            {% for city in cities %}
+            <option value="{{ city.name }}">{{ city.name }}</option>
+            {% endfor %}
+          </select>
         </div>
+        <div class="col-md-12 mb-2" style="padding: 0">
+          <label class="">Choose your manager</label>
+          <select name="manager" class="form-control" required>
+            {% for manager in managers %}
+            <option value="{{ manager.user.id }}">
+              {{ manager.user.first_name }} {{ manager.user.last_name }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-12 mb-2" style="padding: 0">
+          <label class="">Working since</label>
+          <div class="input-group date" id="enddate">
+            <input
+              type="date"
+              class="form-control"
+              name="start_date"
+              required
+            />
+            <span class="input-group-addon">
+              <span class="glyphicon glyphicon-calendar"></span>
+            </span>
+          </div>
+        </div>
+        <div class="col-md-12 mb-2" style="padding: 0">
+          <label class="">Your employment type</label>
+          <select id="city" name="employment_type" class="form-control" required>
+            <option value="1">Full-time</option>
+            <option value="2">Other</option>
+          </select>
+        </div>
+        <div class="form-button">
+          <button id="submit" type="submit" class="ibtn">Register</button>
+        </div>
+      </form>
+      <div class="other-links">
+        <span>Or register with</span><a href="#">Facebook</a
+        ><a href="#">Google</a><a href="#">Linkedin</a>
       </div>
     </div>
   </div>
+</div>
 {% endblock %}

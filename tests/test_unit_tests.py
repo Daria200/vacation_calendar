@@ -52,7 +52,7 @@ def test_verify_days(client, employee_user):
     end_date = datetime.date(year=2023, month=10, day=16)  # "2023-10-16"
     num_days = 11
     current_year = 2023
-    full_day = 1.0
+    duration = 1.0
     vacation_type = 1
     description = "some"
     start_year = 2023
@@ -60,8 +60,8 @@ def test_verify_days(client, employee_user):
         employee,
         start_date,
         num_days,
-        start_year,
-        full_day,
+        current_year,
+        duration,
         vacation_type,
         description,
     )

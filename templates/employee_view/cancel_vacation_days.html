@@ -1,10 +1,18 @@
 {% extends 'employee_view/base.html' %} {% block content %}
 <div class="container">
   <div class="row text-center">
-    <div class="col-md-10">
-      <!-- #TODO: -->
-      <form action="{% url 'vacation_request'  %}" method="POST">
+    <div class="col-md-12">
+      <div id="alert-container"></div>
+
+      <!-- Alerts -->
+      {% include '_alerts.html' %}
+      <form
+        id="vacation-form"
+        action="{% url 'cancel_vacation_days'  %}"
+        method="POST"
+      >
         {% csrf_token %}
+        <div class="alert-container"></div>
         <div class="form-group row">
           <label for="start_date" class="col-sm-2 col-form-label"
             >Start Date</label
@@ -12,7 +20,12 @@
           <div class="col-sm-4">
             <div class="form-group">
               <div class="input-group date" id="startdate">
-                <input type="date" class="form-control" name="startdate"/>
+                <input
+                  type="date"
+                  class="form-control"
+                  name="startdate"
+                  required
+                />
                 <span class="input-group-addon">
                   <span class="glyphicon glyphicon-calendar"></span>
                 </span>
@@ -26,65 +39,17 @@
           <div class="col-sm-4">
             <div class="form-group">
               <div class="input-group date" id="enddate">
-                <input type="date" class="form-control" />
+                <input
+                  type="date"
+                  class="form-control"
+                  name="enddate"
+                  required
+                />
                 <span class="input-group-addon">
                   <span class="glyphicon glyphicon-calendar"></span>
                 </span>
               </div>
             </div>
-          </div>
-        </div>
-
-        <div class="form-group row">
-          <label for="type" class="col-sm-2 col-form-label">Type</label>
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="vacation_type"
-              id="regular_vacation"
-              value="option1"
-            />
-            <label class="form-check-label" for="inlineRadio1">Vacation</label>
-          </div>
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="vacation_type"
-              id="Other"
-              value="option2"
-            />
-            <label class="form-check-label" for="inlineRadio2"
-              >Other/Sonderurlaud</label
-            >
-          </div>
-        </div>
-        <div class="form-group row">
-          <label for="type" class="col-sm-2 col-form-label"
-            >Do you want to take a full day?</label
-          >
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="length"
-              id="length"
-              value="full"
-            />
-            <label class="form-check-label" for="inlineRadio1">Full</label>
-          </div>
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="length"
-              id="half"
-              value="option2"
-            />
-            <label class="form-check-label" for="inlineRadio2"
-              >Half a day</label
-            >
           </div>
         </div>
         <div class="form-group row">

@@ -2,11 +2,8 @@
 <div class="container">
   <div class="row text-center">
     <div class="col-md-12">
-      <!-- #TODO: -->
-      <div id="alert-container"></div>
-
-      <!-- Alerts -->
-      {% include '_alerts.html' %}
+      <div id="alert-container">{% include '_alerts.html' %}</div>
+      
       <form
         id="vacation-form"
         action="{% url 'vacation_request'  %}"
@@ -115,7 +112,10 @@
           <div class="col-sm-4">
             <div class="form-group">
               <div class="input-group description" id="description">
-                <input type="text" class="form-control" />
+                <input type="text" class="form-control" 
+                id="description_input"
+                disabled
+                />
               </div>
             </div>
           </div>
@@ -153,6 +153,15 @@
         event.preventDefault(); // Prevent form submission if dates are invalid
       }
     });
+        // Event listener for radio button change
+        $("input[name='vacation_type']").change(function () {
+          var selectedValue = $("input[name='vacation_type']:checked").val();
+          if (selectedValue === "2") { // Check if "Other/Sonderurlaud" is selected
+            $("#description_input").prop("disabled", false); // Enable the description input
+          } else {
+            $("#description_input").prop("disabled", true);  // Disable the description input
+          }
+        });
   });
 </script>
 {% endblock extrascripts %}

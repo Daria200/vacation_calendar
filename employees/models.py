@@ -33,6 +33,7 @@ class City(models.Model):
 
 
 class Employee(models.Model):
+    EMPLOYMENT_TYPE_CHOICES = ((1, "fulltime"), (2, "parttime"))
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -46,6 +47,8 @@ class Employee(models.Model):
 
     city = models.ForeignKey(City, on_delete=models.SET_NULL, blank=True, null=True)
     is_manager = models.BooleanField(default=False)
+    start_date = models.DateField()
+    employment_type = models.IntegerField(choices=EMPLOYMENT_TYPE_CHOICES)
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"

@@ -13,31 +13,26 @@ from .models import AvailableDays, PublicHolidays, Request, VacationDay
 
 
 def verify_days(
-    employee,
-    start_date,
-    num_days,
-    year,
-    full_day,
-    type,
-    description,
+    employee: Employee,
+    start_date: date,
+    num_days: int,
+    start_year: int,
 ):
     """_summary_
 
     Args:
-        employee (_type_): _description_
-        start_date (_type_): _description_
-        num_days (_type_): _description_
-        year (_type_): _description_
-        full_day (_type_): _description_
-        type (_type_): _description_
-        description (_type_): _description_
+        employee Employee: Instance of the Employee class
+        start_date date: Date when vacation request starts
+        num_days int: Number of days between start and end date icluding weekends and holidays
+        start_year int: Year when the vacation starts
 
 
-    Using start and end date, exclude weekends and public holidays
-    Return days to save
+
+    Using start and number of days, exclude weekends and public holidays
+    Return only work days
 
     Returns:
-        list of vacation_instances
+        list of work days
     """
 
     # Get public holidays for this year
@@ -78,12 +73,19 @@ def verify_days(
 
 @login_required
 def vacation_request(request):
-    # exclude saturdays and sundays, public holidays, save it in the database
-    # return error if:
-    #   the days are already in the database
-    #   the sum of requested + saved days exceed available days
+    """_summary_
+    Accepts a post request containing start_date, end_date, type and description of
+        a vacation request. Excludes weekends and public holidays. Saves days in the database
+        and a request with a status of pending.
+        Checks if requested days do not exceed allotted+transferred days for the year
+    Args:
+        request
 
-    # TODO: edge case
+    Returns:
+        redirects to vacation_request
+    """
+
+    # TODO:
     # An employee can request 0.5 day
 
     if request.method == "POST":
@@ -94,7 +96,7 @@ def vacation_request(request):
         startdate = request.POST["startdate"]
         enddate = request.POST["enddate"]
         vacation_type = request.POST["vacation_type"]
-        full_day = float(request.POST["length"])
+        duration = float(request.POST["length"])
         description = request.POST.get("description")
         vacation_type = vacation_type
 
@@ -110,15 +112,14 @@ def vacation_request(request):
             VacationDay.objects.filter(employee=employee, date__year=start_year)
         )
 
-        # if the requested dates span two years, account for the 2nd year
-        if spans_multi_years:
-            vacation_days_saved_in_db += list(
-                VacationDay.objects.filter(employee=employee, date__year=end_year)
-            )
+        num_of_vacation_days_saved_in_db = 0
+        for day in vacation_days_saved_in_db:
+            num_of_vacation_days_saved_in_db += day.duration
 
         vacation_days_saved_in_db_list = [
             day.date.strftime("%Y-%m-%d") for day in vacation_days_saved_in_db
         ]
+
         # Check if the record is in the DB
         num_days = (end_date - start_date).days + 1
         for i in range(num_days):
@@ -127,20 +128,11 @@ def vacation_request(request):
                 messages.error(request, f"You already requested {current_date}")
                 return redirect("vacation_request")
 
-        num_days_this_year = num_days
-        num_days_next_year = 0
-        if spans_multi_years:
-            num_days_this_year = (
-                datetime.date(year=start_date.year, month=12, day=31) - start_date
-            ).days + 1
-            num_days_next_year = (
-                end_date - datetime.date(year=end_date.year, month=1, day=1)
-            ).days + 1
-
+        # Excludes weekens and public holidays
         work_days = verify_days(
             employee,
             start_date,
-            num_days_this_year,
+            num_days,
             start_year,
         )
         vacation_instances = []
@@ -149,24 +141,16 @@ def vacation_request(request):
                 VacationDay(
                     employee=employee,
                     date=day,
-                    full_day=full_day,
+                    duration=duration,
                     approved=False,
                     type=vacation_type,
                     description=description,
                 )
             )
 
-        days_to_save_in_db_for_next_year = list()
-        if spans_multi_years:
-            days_to_save_in_db_for_next_year = verify_days(
-                employee,
-                datetime.date(year=end_year, month=1, day=1),
-                num_days_next_year,
-                end_year,
-                full_day,
-                vacation_type,
-                description,
-            )
+        num_of_requested_days = 0
+        for day in vacation_instances:
+            num_of_requested_days += day.duration
 
         # Check if the employee does not exceed the available days
         # Get number of available days for the employee
@@ -177,33 +161,17 @@ def vacation_request(request):
             available_days.allotted_days + available_days.transferred_days
         )
 
-        if spans_multi_years:
-            available_days_next_year = AvailableDays.objects.get(
-                employee=employee, year=end_year
-            )
-            total_available_days_next_year = (
-                available_days_next_year.allotted_days
-                + available_days_next_year.transferred_days
-            )
-
-        if len(work_days) > int(total_available_days) - len(
-            vacation_days_saved_in_db
+        if (
+            num_of_requested_days
+            > int(total_available_days) - num_of_vacation_days_saved_in_db
         ):
             messages.error(
                 request,
-                f"You requested {len(work_days)} days, but you have only {int(total_available_days) - len(vacation_days_saved_in_db)} available days for {start_year}",
-            )
-        elif spans_multi_years and len(days_to_save_in_db_for_next_year) > int(
-            total_available_days_next_year
-        ) - len(vacation_days_saved_in_db):
-            messages.error(
-                request,
-                f"You requested {len(days_to_save_in_db_for_next_year)} days, but you have only {int(total_available_days_next_year) - len(vacation_days_saved_in_db)} available days for {start_year}",
+                f"You requested {len(vacation_instances)} days, but you have only {int(total_available_days) - len(vacation_days_saved_in_db)} available days for {start_year}",
             )
         else:
             with transaction.atomic():
-                VacationDay.objects.bulk_create(work_days)
-                VacationDay.objects.bulk_create(days_to_save_in_db_for_next_year)
+                VacationDay.objects.bulk_create(vacation_instances)
                 Request.objects.create(
                     employee=employee,
                     start_date=startdate,
@@ -211,13 +179,7 @@ def vacation_request(request):
                     description=description,
                     request_type=1,
                 )
-            num_days_requested = len(work_days) + len(
-                days_to_save_in_db_for_next_year
-            )
-            messages.success(
-                request,
-                f"You requested {num_days_requested} days",
-            )
+            messages.success(request, f"You requested {len(vacation_instances)} days")
         return redirect("vacation_request")
 
     return render(request, "employee_view/vacation_request.html")
@@ -235,7 +197,7 @@ def transfer_days_request(request):
         startdate = request.POST["startdate"]
         enddate = request.POST["enddate"]
         vacation_type = 1
-        full_day = "1.0"
+        duration = "1.0"
         description = request.POST.get("description")
 
         # Get saved days in the database
@@ -257,32 +219,65 @@ def transfer_days_request(request):
             if current_date.strftime("%Y-%m-%d") in vacation_days_saved_in_db_list:
                 messages.error(request, f"You already requested {current_date}")
                 return redirect("transfer_days_request")
-        days_to_save_in_db = verify_days(
-            employee,
-            start_date,
-            num_days,
-            start_year,
-            full_day,
-            vacation_type,
-            description,
-        )
+        days_to_save_in_db = verify_days(employee, start_date, num_days, start_year)
         available_days_instance = AvailableDays.objects.get(
             employee=employee,
             year=start_year,
         )
         number_of_transferred_days = available_days_instance.transferred_days
         all_transferred = number_of_transferred_days + len(days_to_save_in_db)
-        if len(days_to_save_in_db) > 10 or all_transferred > 10:
+
+        # Check the sum of transferred days for requests that are pending
+        pending_requests = Request.objects.filter(
+            employee=employee,
+            request_type=2,
+            request_status=1,
+            start_date__year=start_year,
+        )
+        total_requested_days_pending = 0
+        for pending_request in pending_requests:
+            num_days = (pending_request.end_date - pending_request.start_date).days + 1
+            work_days = verify_days(
+                employee,
+                pending_request.start_date,
+                num_days,
+                pending_request.start_date.year,
+            )
+            total_requested_days_pending += len(work_days)
+
+        total_days_requested_requested_to_transfer = (
+            total_requested_days_pending
+            + len(days_to_save_in_db)
+            + number_of_transferred_days
+        )
+
+        if (
+            len(days_to_save_in_db) > 10
+            or all_transferred > 10
+            or total_days_requested_requested_to_transfer > 10
+        ):
             messages.error(
                 request,
                 f"You can request to transfer up to 10 days.\n"
                 f"You request {len(days_to_save_in_db)} days.\n"
-                f"You have {number_of_transferred_days} transferred days for the next year",
+                f"You have {number_of_transferred_days+total_requested_days_pending} days transferred or requested to transfer  for the next year",
             )
         else:
+            vacation_instances = []
+            for day in days_to_save_in_db:
+                vacation_instances.append(
+                    VacationDay(
+                        employee=employee,
+                        date=day,
+                        duration=duration,
+                        approved=False,
+                        type=vacation_type,
+                        description=description,
+                    )
+                )
             with transaction.atomic():
                 # create vacation days and the request
-                VacationDay.objects.bulk_create(days_to_save_in_db)
+                VacationDay.objects.bulk_create(vacation_instances)
                 Request.objects.create(
                     employee=employee,
                     start_date=startdate,
@@ -290,21 +285,6 @@ def transfer_days_request(request):
                     description=description,
                     request_type=2,
                 )
-                # # Update available days for the current year
-                # available_days_instance.transferred_days = F("transferred_days") + len(
-                #     days_to_save_in_db
-                # )
-                # available_days_instance.save()
-
-                # # Update transferred days for the previous year
-                # previous_year = start_year - 1
-                # previous_year_available_days = AvailableDays.objects.get(
-                #     employee=employee, year=previous_year
-                # )
-                # previous_year_available_days.allotted_days = F("allotted_days") - len(
-                #     days_to_save_in_db
-                # )
-                # previous_year_available_days.save()
             messages.success(
                 request,
                 f"You requested {len(days_to_save_in_db)} days to transfer to {start_year} year",
@@ -313,5 +293,56 @@ def transfer_days_request(request):
     return render(request, "employee_view/transfer_days_request.html")
 
 
+@login_required
 def cancel_vacation_days(request):
+    # check if the selected days exist in the database
+    # create the requst
+
+    if request.method == "POST":
+        user_id = request.user.id
+        employee = Employee.objects.get(user_id=user_id)
+
+        # Get form values from the form
+        startdate = request.POST["startdate"]
+        enddate = request.POST["enddate"]
+        description = request.POST.get("description")
+
+        # Get saved days in the database
+        start_date = datetime.datetime.strptime(startdate, "%Y-%m-%d").date()
+        end_date = datetime.datetime.strptime(enddate, "%Y-%m-%d").date()
+        start_year = start_date.year
+        vacation_days_saved_in_db = VacationDay.objects.filter(
+            employee=employee,
+            date__range=(start_date, end_date),
+        )
+        num_days = (end_date - start_date).days + 1
+        days_to_check = verify_days(
+            employee=employee,
+            start_date=start_date,
+            num_days=num_days,
+            start_year=start_year,
+        )
+
+        all_days_present = True
+
+        for day in days_to_check:
+            if not vacation_days_saved_in_db.filter(date=day).exists():
+                all_days_present = False
+                messages.error(request, f"You have not requested {day}")
+
+        if all_days_present:
+            with transaction.atomic():
+                Request.objects.create(
+                    employee=employee,
+                    start_date=startdate,
+                    end_date=enddate,
+                    description=description,
+                    request_type=3,
+                )
+            messages.success(
+                request,
+                f"You requested {len(days_to_check)} days to delete",
+            )
+
+        return redirect("cancel_vacation_days")
     return render(request, "employee_view/cancel_vacation_days.html")

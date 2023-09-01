@@ -20,12 +20,15 @@ class EmployeeAdminForm(forms.ModelForm):
 
 class EmployeeAdmin(admin.ModelAdmin):
     form = EmployeeAdminForm
-    list_display = ["name", "surname", "city", "manager", "is_manager"]
+    list_display = ["name", "surname", "city", "display_manager", "is_manager"]
     list_display_links = [
         "name",
         "surname",
     ]
-    list_filter = ["city", "manager"]
+    list_filter = [
+        "city",
+        "manager",
+    ]
     list_editable = ["is_manager"]
     # TODO: Search does not work
     search_fields = ["user__first_name", "user__last_name", "city"]
@@ -37,6 +40,12 @@ class EmployeeAdmin(admin.ModelAdmin):
     def surname(self, obj):
         return obj.user.last_name
 
+    def display_manager(self, obj):
+        if obj.manager:
+            return f"{obj.manager.first_name} {obj.manager.last_name}"
+        return None
+
+    display_manager.short_description = "Manager"
     name.short_description = "First Name"
     surname.short_description = "Last Name"
 

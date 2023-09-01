@@ -4,8 +4,8 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Manager View</title>
-<link rel="stylesheet" href="{% static 'css/manager.css' %}" /> 
 <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" /> 
+<link rel="stylesheet" href="{% static 'css/manager.css' %}" /> 
 </head>
 <body>
 
@@ -45,43 +45,26 @@
       href="{% url 'manager_view_total' %}">Total</a>
 
       <a 
-      {% if '/manager/vacation_requests' == request.path %}
+      {% if '/manager/requests' == request.path %}
         class="active"
       {% else %
         class=""}    
       {% endif %} 
-      href="{% url 'vacation_requests' %}">Vacation requests</a>
+      href="{% url 'requests' %}">All requests</a>
 
-      <a 
-      {% if '/manager/transfer_days_requests' == request.path %}
-        class="active"
-      {% else %
-        class=""}    
-      {% endif %} 
-      href="{% url 'transfer_days_requests' %}">Transfer days requests</a>
-
-      <a 
-      {% if '/manager/cancel_days_requests' == request.path %}
-        class="active"
-      {% else %
-        class=""}    
-      {% endif %} 
-      href="{% url 'cancel_days_requests' %}">Cancel days requests</a>
-
-      <!-- TODO: make it work -->
-      <a href="#">log out</a>
+      <a href="javascript:{document.getElementById('logout').submit()}">log out</a>
+      <form action="{% url 'logout' %}" method="POST" id="logout">
+        {% csrf_token %}
+        <input type="hidden">
+      </form>
     </div>
   </div>
 
     <!-- Main BLock -->
 {% block content %} {% endblock %}
 <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
-<script>
-  $(document).ready(function() {
-    $('#check-all').on('click', function() {
-      $('.request-checkbox').prop('checked', this.checked);
-    });
-  });
-</script>
+<script src="{% static 'js/popper.js' %}"></script>
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
 </body>
 </html>

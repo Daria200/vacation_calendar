@@ -11,6 +11,9 @@ h2 {
   font-weight: 350;
 }
 
+a:hover {
+  color: #ebbd35 !important;
+}
 .btn-secondary {
   color: #fff;
   background-color: #ffdb45 !important;

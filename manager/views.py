@@ -1,112 +1,188 @@
+import datetime
+
+from django.core.paginator import Paginator
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction
+from django.db.models import F, Q, Sum
 from django.shortcuts import redirect, render
 
-from vacations.models import Request, VacationDay
-from vacations.views import verify_days
-from employees.models import Employee
+from employees.models import City, Employee
+from vacations.models import AvailableDays, Request, VacationDay
 
 
-def vacation_requests(request):
-    vacation_requests = Request.objects.filter(request_type=1, request_status=1)
-    context = {"vacation_requests": vacation_requests}
-
-    if request.method == "POST":
-        selected_request_ids = request.POST.getlist("selected_requests")
-        action = request.POST.get("action")
-        requests_to_update = Request.objects.filter(pk__in=selected_request_ids)
-
-        if action == "approve":
-            # Update request status and corresponding vacation days
-            with transaction.atomic():
-                requests_to_update.update(request_status=2)
-
-                # Update vacation days for each approved request
-                for request in requests_to_update:
-                    start_date = request.start_date
-                    end_date = request.end_date
-                    vacation_days = VacationDay.objects.filter(
-                        employee=request.employee, date__range=(start_date, end_date)
-                    )
-                    vacation_days.update(approved=True)
-        elif action == "reject":
-            # Delete vacation days and update request status
-            with transaction.atomic():
-                for request in requests_to_update:
-                    start_date = request.start_date
-                    end_date = request.end_date
-                    vacation_days_to_delete = VacationDay.objects.filter(
-                        employee=request.employee, date__range=(start_date, end_date)
-                    )
-                    vacation_days_to_delete.delete()
-                    request.request_status = 3
-                    request.save()
-
-        return redirect("vacation_requests")
-
-    return render(request, "manager_view/vacation_days_requests.html", context)
+def is_manager(user):
+    return user.is_authenticated and user.employee.is_manager
 
 
-def transfer_days_requests(request):
-    # If a request is approved, set the status to approved and create vacation days,
-    # remove days from this year and days to the next year
-    # If a request is rejected, set the status to rejected
-
-    transfer_requests = Request.objects.filter(request_type=2, request_status=1)
-    context = {"transfer_requests": transfer_requests}
+@user_passes_test(is_manager)
+@login_required
+def requests(request):
+    TYPE_LABELS = {1: "Vacation", 2: "Transfer", 3: "Cancel", 4: "Remote Work"}
+    all_requests = Request.objects.filter(request_status=1)
+    paginator = Paginator(all_requests, 20)
+    page = request.GET.get("page")
+    paged_requests = paginator.get_page(page)
 
     if request.method == "POST":
-        selected_request_ids = request.POST.getlist("selected_requests")
-        action = request.POST.get("action")
+        selected_request_id = request.POST["selected_request_id"]
+        action = request.POST["action"]
 
-        print(action)
-        requests_to_approve = Request.objects.filter(
-            request_type=2, request_status=1, pk__in=selected_request_ids
+        request_to_approve_or_reject = Request.objects.get(
+            pk=selected_request_id
         )
-        print("requests_to_approve", requests_to_approve)
+        employee = request_to_approve_or_reject.employee
+        start_date = request_to_approve_or_reject.start_date
+        end_date = request_to_approve_or_reject.end_date
+        if request_to_approve_or_reject.request_type == 1:
+            vacation_days_to_approve_or_reject = VacationDay.objects.filter(
+                employee=employee,
+                date__range=(start_date, end_date),
+            )
+            if action == "approve":
+            # approve vacation days in db (VacationDay)
+            # update the request (Request)
+                with transaction.atomic():
+                    request_to_approve_or_reject.request_status = 2
+                    request_to_approve_or_reject.save()
+                    vacation_days_to_approve_or_reject.update(approved=True)
+                    messages.success(request, f"The request has been approved")
 
-        employees_requested_transfer = ()
-        for request in requests_to_approve:
-            print(request.employee)
-            print(request.employee_id)
-            employees_requested_transfer.apppend(request.employee)
+            elif action == "reject":
+                # delete vacation days in db (VacationDay)
+                # set the request to rejected (Request)
+                with transaction.atomic():
+                    request_to_approve_or_reject.request_status = 3
+                    request_to_approve_or_reject.save()
+                    vacation_days_to_approve_or_reject.delete()
+                    messages.success(request, f"The request has been rejected")
+        elif request_to_approve_or_reject.request_type == 2:
+            vacation_days_to_approve_or_reject = VacationDay.objects.filter(
+            employee=employee,
+            date__range=(start_date, end_date),
+        )
+            num_of_days = len(vacation_days_to_approve_or_reject)
 
-        for employee in employees_requested_transfer:
-            pass
-        if action == "approve":
-            with transaction.atomic():
-                requests_to_approve.update(request_status=2)
-
-                # Update vacation days for each approved request
-                for request in requests_to_approve:
-                    start_date = request.start_date
-                    end_date = request.end_date
-                    vacation_days = VacationDay.objects.filter(
-                        employee=request.employee, date__range=(start_date, end_date)
+            if action == "approve":
+                start_year = start_date.year
+                available_days_instance_next_year = AvailableDays.objects.get(
+                    employee=employee,
+                    year=start_year,
+                )
+                available_days_this_year = AvailableDays.objects.get(
+                    employee=employee, year=start_year - 1
+                )
+                # approve vacation days in db (VacationDay)
+                # update the request (Request)
+                # subtract days from allotted days this year
+                # add transferred days next year
+                with transaction.atomic():
+                    request_to_approve_or_reject.request_status = 2
+                    request_to_approve_or_reject.save()
+                    vacation_days_to_approve_or_reject.update(approved=True)
+                    available_days_instance_next_year.transferred_days = (
+                        F("transferred_days") + num_of_days
                     )
-                    vacation_days.update(approved=True)
-        elif action == "reject":
-            # Delete vacation days and update request status
-            with transaction.atomic():
-                for request in requests_to_update:
-                    start_date = request.start_date
-                    end_date = request.end_date
-                    vacation_days_to_delete = VacationDay.objects.filter(
-                        employee=request.employee, date__range=(start_date, end_date)
+                    available_days_instance_next_year.save()
+                    available_days_this_year.allotted_days = (
+                        F("allotted_days") - num_of_days
                     )
-                    vacation_days_to_delete.delete()
-                    request.request_status = 3
-                    request.save()
+                    available_days_this_year.save()
+                    messages.success(request, f"The request has been approved")
 
-        return redirect("transfer_days_requests")
-    return render(request, "manager_view/transfer_days_requests.html", context)
+            elif action == "reject":
+                # delete vacation days in db (VacationDay)
+                # set the request to rejected (Request)
+                with transaction.atomic():
+                    request_to_approve_or_reject.request_status = 3
+                    request_to_approve_or_reject.save()
+                    vacation_days_to_approve_or_reject.delete()
+                    messages.success(request, f"The request has been rejected")
 
+        elif request_to_approve_or_reject.request_type == 3:
+            vacation_days_to_approve_or_reject = VacationDay.objects.filter(
+            employee=employee,
+            date__range=(start_date, end_date),
+        )
+            if action == "approve":
+                with transaction.atomic():
+                    # Set the request status to apptove
+                    # Delete the days from the DB
+                    vacation_days_to_approve_or_reject.delete()
+                    request_to_approve_or_reject.request_status = 2
+                    request_to_approve_or_reject.save()
+                    messages.success(request, f"The request has been approved")
 
-def cancel_days_requests(request):
-    return render(request, "manager_view/delete_days_requests.html")
+            elif action == "reject":
+                # Set the request status to rejected
+                with transaction.atomic():
+                    request_to_approve_or_reject.request_status = 3
+                    request_to_approve_or_reject.save()
+                    messages.success(request, f"The request has been rejected")
+        return redirect("requests")
 
+    context = {"all_requests": paged_requests}
+    return render(request, "manager_view/requests.html", context)
 
+@user_passes_test(is_manager)
+@login_required
 def hr_view(request):
-    return render(request, "manager_view/hr_view.html")
+    managers = Employee.objects.filter(is_manager=True)
+    cities = City.objects.all()
+
+    employee_name = request.GET.get("employee_name")
+    year = request.GET.get("year", datetime.date.today().year)
+    manager_id = request.GET.get("manager")
+    city_id = request.GET.get("city")
+
+    employees = Employee.objects.all()
+
+    if employee_name:
+        employees = employees.filter(
+            Q(user__first_name__icontains=employee_name)
+            | Q(user__last_name__icontains=employee_name)
+        )
+    if manager_id:
+        employees = employees.filter(manager_id=manager_id)
+    if city_id:
+        employees = employees.filter(city_id=city_id)
+
+    # Get vacation days
+    vacation_days = VacationDay.objects.filter(date__year=year, employee__in=employees)
+    employee_id_to_vacation_days = {}
+    employee_id_to_approved_days = {}
+
+    for vacation_day in vacation_days:
+        if vacation_day.employee.id not in employee_id_to_vacation_days:
+            employee_id_to_vacation_days[vacation_day.employee.id] = 0
+            employee_id_to_approved_days[vacation_day.employee.id] = 0
+        employee_id_to_vacation_days[vacation_day.employee.id] += vacation_day.duration
+        if vacation_day.approved:
+            employee_id_to_approved_days[
+                vacation_day.employee.id
+            ] += vacation_day.duration
+
+    # Get available days
+
+    for employee in employees:
+        setattr(
+            employee,
+            "total_vacation_days",
+            employee_id_to_vacation_days.get(employee.id, 0),
+        )
+        setattr(
+            employee,
+            "total_approved_days",
+            employee_id_to_approved_days.get(employee.id, 0),
+        )
+    employees = employees.select_related("user")
+    context = {
+        "managers": managers,
+        "cities": cities,
+        "employees": employees,
+        "year": year,
+    }
+    return render(request, "manager_view/hr_view.html", context)
 
 
 def manager_view_monthly(request):

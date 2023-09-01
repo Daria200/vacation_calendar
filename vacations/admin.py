@@ -39,7 +39,7 @@ class VacationDayAdmin(admin.ModelAdmin):
         "employee_name",
         "employee_surname",
         "date",
-        "full_day",
+        "duration",
         "type",
         "description",
         "approved",
