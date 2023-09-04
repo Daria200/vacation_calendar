@@ -14,14 +14,6 @@ def calendar(request):
     return render(request, "employee_view/calendar.html")
 
 
-# TODO:redo
-def employee_calendar(request):
-    managers = Employee.objects.filter(is_manager=True)
-    cities = City.objects.all()
-    context = {"managers": managers, "cities": cities}
-    return render(request, "employee_calendar.html", context)
-
-
 # Employees can see their progress and which days they have taken
 # they will see how many days are left
 @login_required
@@ -32,21 +24,20 @@ def dashboard(request):
         3: "Rejected",
     }
 
-    TYPE_LABELS = {
-        1: "Vacation",
-        2: "Transfer",
-        3: "Cancel",
-        4: 'Remote Work'
-    }
+    TYPE_LABELS = {1: "Vacation", 2: "Transfer", 3: "Cancel", 4: "Remote Work"}
 
     user_id = request.user.id
     employee = Employee.objects.get(user_id=user_id)
-    years = AvailableDays.objects.filter(employee=employee).values_list('year', flat=True).distinct()
+    years = (
+        AvailableDays.objects.filter(employee=employee)
+        .values_list("year", flat=True)
+        .distinct()
+    )
     current_year = date.today().year
 
     if request.method == "POST":
         print(request.POST)
-        current_year =int(request.POST["year"])
+        current_year = int(request.POST["year"])
 
     all_requests_this_year = Request.objects.filter(
         employee=employee, start_date__year=current_year
@@ -56,16 +47,15 @@ def dashboard(request):
     )
     # if not transfer_requests_next_year.exists():
     #     transfer_requests_next_year = None
-    
+
     if transfer_requests_next_year:
         # Combine querysets using the OR operator
         all_requests = all_requests_this_year | transfer_requests_next_year
     else:
         all_requests = all_requests_this_year
     vacation_days_saved_in_db_this_year = VacationDay.objects.filter(
-            employee=employee, date__year=current_year
-        )
-    
+        employee=employee, date__year=current_year
+    )
 
     num_of_vac_days = len(vacation_days_saved_in_db_this_year)
     available_days_instance = AvailableDays.objects.get(
@@ -94,6 +84,7 @@ def dashboard(request):
 from django import template
 
 register = template.Library()
+
 
 @register.filter
 def dict_lookup(dictionary, key):

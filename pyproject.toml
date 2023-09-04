@@ -23,5 +23,5 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "vacation_calendar.settings"
+DJANGO_SETTINGS_MODULE = "vacation_planner.settings"
 python_files = ["tests/test_*.py"]
