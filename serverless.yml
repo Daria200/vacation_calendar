@@ -5,227 +5,75 @@ frameworkVersion: "3"
 custom:
   region: ${env:AWS_DEFAULT_REGION, "eu-central-1"}
   baseName: vacation-planner
+  stages:
+    - development
+    - production
+  stage: ${opt:stage, self:provider.stage}
+  pythonRequirements:
+    # TODO: use docker if there are any python dependencies that aren't pure python
+    # dockerizePip: non-linux
+    usePoetry: false
+    layer: true
+  hooks:
+    before:package:initialize:
+      # create a requirements.txt from poetry to work with above tooling
+      - poetry export --without-hashes -f requirements.txt > requirements.txt
+  wsgi:
+    app: vacation_planner/wsgi.application
+    pythonBin: python3
 
 provider:
   name: aws
-  runtime: "python3.7"
+  runtime: "python3.9"
   region: ${self:custom.region}
-  stage: ${env:ENVIRONMENT}
-  stackName: ${self:custom.baseName}-${self:custom.stage}
+  stage: ${opt:stage, 'development'}
+  stackName: ${self:custom.baseName}-cf-stack-${self:custom.stage}
   logRetentionInDays: 14
   deploymentMethod: direct
   deploymentBucket:
-    name: ${self:custom.baseName}-serverless-deployment-bucket
+    name: ${self:custom.baseName}-serverless-deployment-bucket-${self:custom.stage}
     tags:
       project: ${self:custom.baseName}
   tags:
     project: ${self:custom.baseName}
-    environment: ${env:ENVIRONMENT}
+    environment: ${self:custom.stage}
   stackTags:
     project: ${self:custom.baseName}
-    environment: ${env:ENVIRONMENT}
+    environment: ${self:custom.stage}
   # Environment variables injected into the function runtime
   environment:
-    ENVIRONMENT: ${env:ENVIRONMENT}
-  iam:
-    role:
-      name: ${self:custom.baseName}-${env:ENVIRONMENT}
-      statements:
-        # Allow functions to manipulate files in the S3 bucket
-        - Effect: Allow
-          Resource:
-            - "arn:aws:s3:::${self:custom.baseName}-*"
-          Action:
-            - "s3:GetObject*"
-            - "s3:PutObject*"
-            - "s3:DeleteObject"
-            - "s3:HeadObject"
-        # Allow functions to interact with AWS RDS
-        - Effect: Allow
-          Resource:
-            - "arn:aws:rds:${self:provider.region}:${self:custom.baseName}-db/*"
-          Action:
-            - "rds:CreateDBInstance"
-            - "rds:DeleteDBInstance"
-            - "rds:DescribeDBInstances"
-            - "rds:ModifyDBInstance"
-            - "rds:RestoreDBInstanceFromDBSnapshot"
-            - "rds:RebootDBInstance"
+    STAGE: ${self:custom.stage}
+    SECRET_KEY: ${env:SECRET_KEY}
 
 functions:
-  vacation_request:
-    name: ${self:custom.baseName}-vacation-request-${env:ENVIRONMENT}
-    handler: vacations.views.vacation_request
-    description: Accepts a post request with vacation data
-    maximumRetryAttempts: 0
-    memorySize: 512
-    timeout: 900
+  django-app:
+    name: ${self:custom.baseName}-django-webapp-${self:custom.stage}
+    handler: wsgi_handler.handler
+    layers:
+      - { Ref: PythonRequirementsLambdaLayer }
     events:
-      - http:
-          path: /vacation_request
-          method: ANY
-
-  transfer_days_request:
-    name: ${self:custom.baseName}-transfer-request-${env:ENVIRONMENT}
-    handler: vacations.views.transfer_days_request
-    description: Accepts a post request to transfer days
-    maximumRetryAttempts: 0
-    memorySize: 512
-    timeout: 900
-    events:
-      - http:
-          path: /transfer-days-request
-          method: ANY
-
-  cancel_vacation_days:
-    name: ${self:custom.baseName}-cancel-request-${env:ENVIRONMENT}
-    handler: vacations.views.cancel_vacation_days
-    description: Accepts a post request to cancel requested days
-    maximumRetryAttempts: 0
-    memorySize: 512
-    timeout: 900
-    events:
-      - http:
-          path: /cancel-vacation-days
-          method: ANY
-
-  remote_work_request:
-    name: ${self:custom.baseName}-remote-work-request-${env:ENVIRONMENT}
-    handler: vacations.views.remote_work_request
-    description: Accepts a post request to request remote work
-    maximumRetryAttempts: 0
-    memorySize: 512
-    timeout: 900
-    events:
-      - http:
-          path: /remote-work-request
-          method: ANY
-
-  requests:
-    name: ${self:custom.baseName}-remote-work-request-${env:ENVIRONMENT}
-    handler: manager.views.requests
-    description: Displays all requests, approves or rejects a request
-    maximumRetryAttempts: 0
-    memorySize: 512
-    timeout: 900
-    events:
-      - http:
-          path: /manager/requests
-          method: ANY
-
-  hr_view:
-    name: ${self:custom.baseName}-hr-view-${env:ENVIRONMENT}
-    handler: manager.views.hr_view
-    description: Displays data about employees vacations
-    maximumRetryAttempts: 0
-    memorySize: 512
-    timeout: 900
-    events:
-      - http:
-          path: /manager/hr-view
-          method: GET
-
-  manager_view_monthly:
-    name: ${self:custom.baseName}-monthly-view-${env:ENVIRONMENT}
-    handler: manager.views.manager_view_monthly
-    description: Displays data about employees vacations per month
-    maximumRetryAttempts: 0
-    memorySize: 512
-    timeout: 900
-    events:
-      - http:
-          path: /manager/manager-view-monthly
-          method: GET
-
-  manager_view_total:
-    name: ${self:custom.baseName}-total-view-${env:ENVIRONMENT}
-    handler: manager.views.manager_view_total
-    description: Displays data about employees vacations
-    maximumRetryAttempts: 0
-    memorySize: 512
-    timeout: 900
-    events:
-      - http:
-          path: /manager/manager-view-total
-          method: GET
-
-  register:
-    name: ${self:custom.baseName}-register-${env:ENVIRONMENT}
-    handler: employees.views.register
-    description: Registers new users
-    maximumRetryAttempts: 0
-    memorySize: 512
-    timeout: 900
-    events:
-      - http:
-          path: /register
-          method: ANY
-
-  login:
-    name: ${self:custom.baseName}-login-${env:ENVIRONMENT}
-    handler: employees.views.login
-    description: Logs in users
-    maximumRetryAttempts: 0
-    memorySize: 512
-    timeout: 900
-    events:
-      - http:
-          path: /login
-          method: ANY
-
-  logout:
-    name: ${self:custom.baseName}-logout-${env:ENVIRONMENT}
-    handler: employees.views.logout
-    description: Logs out users
-    maximumRetryAttempts: 0
-    memorySize: 512
-    timeout: 900
-    events:
-      - http:
-          path: /logout
-          method: ANY
-
-  calendar:
-    name: ${self:custom.baseName}-calendar-${env:ENVIRONMENT}
-    handler: employee_dashboard.views.calendar
-    description: Displays a calendar
-    maximumRetryAttempts: 0
-    memorySize: 512
-    timeout: 900
-    events:
-      - http:
-          path: /calendar
-          method: ANY
-
-  dashboard:
-    name: ${self:custom.baseName}-dashboard-${env:ENVIRONMENT}
-    handler: employee_dashboard.views.dashboard
-    description: Displays a dashboard
-    maximumRetryAttempts: 0
-    memorySize: 512
-    timeout: 900
-    events:
-      - http:
-          path: /dashboard
-          method: ANY
+      - http: ANY /
+      - http: ANY /{proxy+}
 
 plugins:
+  - serverless-deployment-bucket
+  - serverless-hooks-plugin
   - serverless-python-requirements
-
-resources:
-  Resources:
-    RdsDatabase:
-      Type: AWS::RDS::DBInstance
-      Properties:
-        DBName: ${self:custom.baseName}-rds-database-${env:ENVIRONMENT}
-        AllocatedStorage: # Size of the database storage in GB
-        DBInstanceIdentifier: ${self:custom.baseName}-rds-database-${env:ENVIRONMENT}
-        Engine: postgres
-        MasterUsername: admin
-        MasterUserPassword:
-        BackupRetentionPeriod: 7 # Number of days to retain automated backups
-        MultiAZ: false # Set to true for Multi-AZ deployment
-        PubliclyAccessible: false
-        VPCSecurityGroups:
-          -  #  security group ID(s)
-      DeletionPolicy: Snapshot # Set to Snapshot if you want to retain a final database snapshot on deletion
+  - serverless-wsgi
+# resources:
+#   Resources:
+#     RdsDatabase:
+#       Type: AWS::RDS::DBInstance
+#       Properties:
+#         DBName: ${self:custom.baseName}-db-${self:custom.stage}
+#         AllocatedStorage: # Size of the database storage in GB
+#         DBInstanceIdentifier: ${self:custom.baseName}-db-${self:custom.stage}
+#         Engine: postgres
+#         MasterUsername: ${env:DB_USER}
+#         MasterUserPassword: ${env:DB_PASS}
+#         BackupRetentionPeriod: 7 # Number of days to retain automated backups
+#         MultiAZ: false # Set to true for Multi-AZ deployment
+#         PubliclyAccessible: false
+#         VPCSecurityGroups:
+#           -  #  security group ID(s)
+#       DeletionPolicy: Snapshot # Set to Snapshot if you want to retain a final database snapshot on deletion
