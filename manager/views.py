@@ -4,11 +4,11 @@ from django.core.paginator import Paginator
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction
-from django.db.models import F, Q, Sum
+from django.db.models import F, Q
 from django.shortcuts import redirect, render
 
 from employees.models import City, Employee
-from vacations.models import AvailableDays, Request, VacationDay
+from vacations.models import AvailableDays, Request, VacationDay, RemoteDay
 
 
 def is_manager(user):
@@ -18,7 +18,6 @@ def is_manager(user):
 @user_passes_test(is_manager)
 @login_required
 def requests(request):
-    TYPE_LABELS = {1: "Vacation", 2: "Transfer", 3: "Cancel", 4: "Remote Work"}
     all_requests = Request.objects.filter(request_status=1)
     paginator = Paginator(all_requests, 20)
     page = request.GET.get("page")
@@ -28,9 +27,7 @@ def requests(request):
         selected_request_id = request.POST["selected_request_id"]
         action = request.POST["action"]
 
-        request_to_approve_or_reject = Request.objects.get(
-            pk=selected_request_id
-        )
+        request_to_approve_or_reject = Request.objects.get(pk=selected_request_id)
         employee = request_to_approve_or_reject.employee
         start_date = request_to_approve_or_reject.start_date
         end_date = request_to_approve_or_reject.end_date
@@ -40,8 +37,8 @@ def requests(request):
                 date__range=(start_date, end_date),
             )
             if action == "approve":
-            # approve vacation days in db (VacationDay)
-            # update the request (Request)
+                # approve vacation days in db (VacationDay)
+                # update the request (Request)
                 with transaction.atomic():
                     request_to_approve_or_reject.request_status = 2
                     request_to_approve_or_reject.save()
@@ -58,9 +55,9 @@ def requests(request):
                     messages.success(request, f"The request has been rejected")
         elif request_to_approve_or_reject.request_type == 2:
             vacation_days_to_approve_or_reject = VacationDay.objects.filter(
-            employee=employee,
-            date__range=(start_date, end_date),
-        )
+                employee=employee,
+                date__range=(start_date, end_date),
+            )
             num_of_days = len(vacation_days_to_approve_or_reject)
 
             if action == "approve":
@@ -101,9 +98,9 @@ def requests(request):
 
         elif request_to_approve_or_reject.request_type == 3:
             vacation_days_to_approve_or_reject = VacationDay.objects.filter(
-            employee=employee,
-            date__range=(start_date, end_date),
-        )
+                employee=employee,
+                date__range=(start_date, end_date),
+            )
             if action == "approve":
                 with transaction.atomic():
                     # Set the request status to apptove
@@ -119,10 +116,33 @@ def requests(request):
                     request_to_approve_or_reject.request_status = 3
                     request_to_approve_or_reject.save()
                     messages.success(request, f"The request has been rejected")
+        elif request_to_approve_or_reject.request_type == 4:
+            remote_days_to_approve_or_reject = RemoteDay.objects.filter(
+                employee=employee,
+                date__range=(start_date, end_date),
+            )
+            if action == "approve":
+                # approve remote days in db
+                # update the request (Request)
+                with transaction.atomic():
+                    request_to_approve_or_reject.request_status = 2
+                    request_to_approve_or_reject.save()
+                    remote_days_to_approve_or_reject.update(approved=True)
+                    messages.success(request, f"The request has been approved")
+
+            elif action == "reject":
+                # delete vacation days in db (VacationDay)
+                # set the request to rejected (Request)
+                with transaction.atomic():
+                    request_to_approve_or_reject.request_status = 3
+                    request_to_approve_or_reject.save()
+                    remote_days_to_approve_or_reject.delete()
+                    messages.success(request, f"The request has been rejected")
         return redirect("requests")
 
     context = {"all_requests": paged_requests}
     return render(request, "manager_view/requests.html", context)
+
 
 @user_passes_test(is_manager)
 @login_required

@@ -1,9 +1,8 @@
 import pytest
 from django.urls import reverse
 from parameterized import parameterized
-from datetime import timedelta
 
-from vacations.models import AvailableDays, Request, VacationDay
+from vacations.models import AvailableDays, Request, VacationDay, RemoteDay
 
 
 @pytest.mark.django_db
@@ -219,6 +218,7 @@ def test_cancel_requests(client, employee_user, start_date, end_date, request_st
     assert Request.objects.get(request_type=3, employee=employee).request_status == 1
     assert Request.objects.get(request_type=1, employee=employee).request_status == 1
 
+
 @pytest.mark.parametrize(
     "start_date, end_date, num_vacation_days_2023",
     [
@@ -266,3 +266,49 @@ def test_vacation_requests_0_5_days(
     for day in updated_vacation_days:
         num_of_days += day.duration
     assert num_of_days == num_vacation_days_2023
+
+
+@pytest.mark.parametrize(
+    "start_date, end_date, num_remote_days",
+    [
+        ("2024-01-14", "2024-01-17", 3),
+        ("2024-01-14", "2024-02-17", 25),
+        ("2024-01-05", "2024-02-17", 0),
+    ],
+)
+@pytest.mark.django_db
+def test_remote_work_request(
+    client, employee_user, start_date, end_date, num_remote_days
+):
+    employee = employee_user
+
+    AvailableDays.objects.create(
+        employee=employee,
+        allotted_days=30,
+        transferred_days=0.0,
+        remote_work_days=30,
+        year=2024,
+    )
+
+    assert (
+        AvailableDays.objects.filter(employee=employee, year=2024)
+        .first()
+        .remote_work_days
+        == 30
+    )
+
+    client.force_login(employee.user)
+
+    response = client.post(
+        reverse("remote_work_request"),
+        {
+            "startdate": start_date,
+            "enddate": end_date,
+            "description": "somedescription",
+        },
+    )
+
+    assert (
+        RemoteDay.objects.filter(employee=employee, date__year=2024).count()
+        == num_remote_days
+    )

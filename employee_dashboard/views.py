@@ -36,6 +36,7 @@ def dashboard(request):
         1: "Vacation",
         2: "Transfer",
         3: "Cancel",
+        4: 'Remote Work'
     }
 
     user_id = request.user.id
@@ -88,3 +89,12 @@ def dashboard(request):
         "current_year": current_year,
     }
     return render(request, "employee_view/dashboard.html", context)
+
+
+from django import template
+
+register = template.Library()
+
+@register.filter
+def dict_lookup(dictionary, key):
+    return dictionary.get(key, key)

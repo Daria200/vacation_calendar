@@ -18,12 +18,6 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-
-# Employees app stores data about the employes, manages employee profiles, authentication, and permissions
-# Calendarapp provides the calendar functionality, allowing employees to view their vacation days
-# Vacation app tracks vacation days for each employee
-# Manager app displays views for managers
-
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -47,7 +41,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "vacation_calendar.urls"
+ROOT_URLCONF = "vacation_planner.urls"
 
 TEMPLATES = [
     {
@@ -65,7 +59,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "vacation_calendar.wsgi.application"
+WSGI_APPLICATION = "vacation_planner.wsgi.application"
 
 
 # Database
@@ -117,7 +111,7 @@ USE_TZ = True
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "vacation_calendar", "static")]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "vacation_planner", "static")]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

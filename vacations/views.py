@@ -4,12 +4,11 @@ from datetime import date, timedelta
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.db.models import F
 from django.shortcuts import redirect, render
 
 from employees.models import Employee
 
-from .models import AvailableDays, PublicHolidays, Request, VacationDay
+from .models import AvailableDays, PublicHolidays, Request, VacationDay, RemoteDay
 
 
 def verify_days(
@@ -84,9 +83,6 @@ def vacation_request(request):
     Returns:
         redirects to vacation_request
     """
-
-    # TODO:
-    # An employee can request 0.5 day
 
     if request.method == "POST":
         user_id = request.user.id
@@ -346,3 +342,85 @@ def cancel_vacation_days(request):
 
         return redirect("cancel_vacation_days")
     return render(request, "employee_view/cancel_vacation_days.html")
+
+
+@login_required
+def remote_work_request(request):
+    if request.method == "POST":
+        user_id = request.user.id
+        employee = Employee.objects.get(user_id=user_id)
+
+        # Get form values from the form
+        startdate = request.POST["startdate"]
+        enddate = request.POST["enddate"]
+        description = request.POST.get("description")
+
+        # Get saved days in the database
+        start_date = datetime.datetime.strptime(startdate, "%Y-%m-%d").date()
+        end_date = datetime.datetime.strptime(enddate, "%Y-%m-%d").date()
+        start_year = start_date.year
+        remote_days_saved_in_db = RemoteDay.objects.filter(
+            employee=employee, date__year=start_year
+        )
+
+        num_of_remote_days_saved_in_db = len(remote_days_saved_in_db)
+
+        remote_days_saved_in_db_list = [
+            day.date.strftime("%Y-%m-%d") for day in remote_days_saved_in_db
+        ]
+
+        # Check if the record is in the DB
+        num_days = (end_date - start_date).days + 1
+        for i in range(num_days):
+            current_date = start_date + timedelta(days=i)
+            if current_date.strftime("%Y-%m-%d") in remote_days_saved_in_db_list:
+                messages.error(request, f"You already requested {current_date}")
+                return redirect("vacation_request")
+
+        # Excludes weekens and public holidays
+        work_days = verify_days(
+            employee,
+            start_date,
+            num_days,
+            start_year,
+        )
+        days_instances = []
+        for day in work_days:
+            days_instances.append(
+                RemoteDay(
+                    employee=employee,
+                    date=day,
+                    approved=False,
+                    description=description,
+                )
+            )
+
+        # Check if the employee does not exceed the available days
+        # Get number of available days for the employee
+        available_remote_days_instance = AvailableDays.objects.get(
+            employee=employee, year=start_year
+        )
+        num_of_requested_days = len(days_instances)
+        if (
+            num_of_requested_days
+            > available_remote_days_instance.remote_work_days
+            - num_of_remote_days_saved_in_db
+        ):
+            messages.error(
+                request,
+                f"You requested {num_of_requested_days} days, but you have only {available_remote_days_instance.remote_work_days - num_of_remote_days_saved_in_db} available days for {start_year}",
+            )
+        else:
+            with transaction.atomic():
+                RemoteDay.objects.bulk_create(days_instances)
+                Request.objects.create(
+                    employee=employee,
+                    start_date=startdate,
+                    end_date=enddate,
+                    description=description,
+                    request_type=4,
+                )
+            messages.success(request, f"You requested {num_of_requested_days} days")
+        return redirect("remote_work_request")
+
+    return render(request, "employee_view/remote_work_request.html")
