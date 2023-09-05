@@ -1,0 +1,79 @@
+service: "vacation-planner"
+
+frameworkVersion: "3"
+
+custom:
+  region: ${env:AWS_DEFAULT_REGION, "eu-central-1"}
+  baseName: vacation-planner
+  stages:
+    - development
+    - production
+  stage: ${opt:stage, self:provider.stage}
+  pythonRequirements:
+    # TODO: use docker if there are any python dependencies that aren't pure python
+    # dockerizePip: non-linux
+    usePoetry: false
+    layer: true
+  hooks:
+    before:package:initialize:
+      # create a requirements.txt from poetry to work with above tooling
+      - poetry export --without-hashes -f requirements.txt > requirements.txt
+  wsgi:
+    app: vacation_planner/wsgi.application
+    pythonBin: python3
+
+provider:
+  name: aws
+  runtime: "python3.9"
+  region: ${self:custom.region}
+  stage: ${opt:stage, 'development'}
+  stackName: ${self:custom.baseName}-cf-stack-${self:custom.stage}
+  logRetentionInDays: 14
+  deploymentMethod: direct
+  deploymentBucket:
+    name: ${self:custom.baseName}-serverless-deployment-bucket-${self:custom.stage}
+    tags:
+      project: ${self:custom.baseName}
+  tags:
+    project: ${self:custom.baseName}
+    environment: ${self:custom.stage}
+  stackTags:
+    project: ${self:custom.baseName}
+    environment: ${self:custom.stage}
+  # Environment variables injected into the function runtime
+  environment:
+    STAGE: ${self:custom.stage}
+    SECRET_KEY: ${env:SECRET_KEY}
+
+functions:
+  django-app:
+    name: ${self:custom.baseName}-django-webapp-${self:custom.stage}
+    handler: wsgi_handler.handler
+    layers:
+      - { Ref: PythonRequirementsLambdaLayer }
+    events:
+      - http: ANY /
+      - http: ANY /{proxy+}
+
+plugins:
+  - serverless-deployment-bucket
+  - serverless-hooks-plugin
+  - serverless-python-requirements
+  - serverless-wsgi
+# resources:
+#   Resources:
+#     RdsDatabase:
+#       Type: AWS::RDS::DBInstance
+#       Properties:
+#         DBName: ${self:custom.baseName}-db-${self:custom.stage}
+#         AllocatedStorage: # Size of the database storage in GB
+#         DBInstanceIdentifier: ${self:custom.baseName}-db-${self:custom.stage}
+#         Engine: postgres
+#         MasterUsername: ${env:DB_USER}
+#         MasterUserPassword: ${env:DB_PASS}
+#         BackupRetentionPeriod: 7 # Number of days to retain automated backups
+#         MultiAZ: false # Set to true for Multi-AZ deployment
+#         PubliclyAccessible: false
+#         VPCSecurityGroups:
+#           -  #  security group ID(s)
+#       DeletionPolicy: Snapshot # Set to Snapshot if you want to retain a final database snapshot on deletion

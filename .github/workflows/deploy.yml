@@ -1,0 +1,115 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches:
+      - "development"
+      - "production"
+
+jobs:
+  deploy-development:
+    name: Deploy to development
+    runs-on: ubuntu-latest
+    if: ${{ github.base_ref == 'development' }}
+    environment:
+      name: development
+      url: ${{ steps.deployment-url.outputs.url }}
+    env:
+      ENVIRONMENT: development
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+      - name: Cache poetry installation
+        id: cache-poetry
+        uses: actions/cache@v3
+        with:
+          key: poetry-${{ hashFiles('poetry.lock') }}
+          path: |
+            ~/.local/bin/poetry
+            ~/.local/share/pypoetry
+            ~/.cache/pypoetry
+      - name: Install poetry
+        if: ${{ steps.cache-poetry.outputs.cache-hit != 'true' }}
+        run: curl -sSL https://install.python-poetry.org | python3 -
+      - name: Install project and its dependencies
+        run: |
+          export PATH="~/.local/share/pypoetry/bin:$PATH"
+          poetry install
+      - name: Install node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+      - name: Cache node dependencies
+        uses: actions/cache@v3
+        with:
+          key: node-${{ hashFiles('package-lock.json') }}
+          path: ./node_modules
+      - name: Install node dependencies
+        run: npm install
+      - name: Deploy
+        run: scripts/deploy.sh
+      - name: Set deployment URL
+        id: deployment-url
+        run: |
+          SERVICE_URL=$(poetry run python scripts/parse_url.py serverless-deploy-output.txt)
+          echo "::set-output name=url::$SERVICE_URL"
+  deploy-production:
+    name: Deploy to production
+    runs-on: ubuntu-latest
+    if: ${{ github.base_ref == 'production' }}
+    environment:
+      name: production
+      url: ${{ steps.deployment-url.outputs.url }}
+    env:
+      ENVIRONMENT: production
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+      - name: Cache poetry installation
+        id: cache-poetry
+        uses: actions/cache@v3
+        with:
+          key: poetry-${{ hashFiles('poetry.lock') }}
+          path: |
+            ~/.local/bin/poetry
+            ~/.local/share/pypoetry
+            ~/.cache/pypoetry
+      - name: Install poetry
+        if: ${{ steps.cache-poetry.outputs.cache-hit != 'true' }}
+        run: curl -sSL https://install.python-poetry.org | python3 -
+      - name: Install project and its dependencies
+        run: |
+          export PATH="~/.local/share/pypoetry/bin:$PATH"
+          poetry install
+      - name: Install node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+      - name: Cache node dependencies
+        uses: actions/cache@v3
+        with:
+          key: node-${{ hashFiles('package-lock.json') }}
+          path: ./node_modules
+      - name: Install node dependencies
+        run: npm install
+      - name: Deploy
+        run: scripts/deploy.sh
+      - name: Set deployment URL
+        id: deployment-url
+        run: |
+          SERVICE_URL=$(poetry run python scripts/parse_url.py serverless-deploy-output.txt)
+          echo "::set-output name=url::$SERVICE_URL"

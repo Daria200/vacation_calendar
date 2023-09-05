@@ -1,0 +1,7 @@
+asgiref==3.7.2 ; python_version >= "3.9" and python_version < "4.0"
+django-non-dark-admin==2.0.2 ; python_version >= "3.9" and python_version < "4.0"
+django==4.2.3 ; python_version >= "3.9" and python_version < "4.0"
+parameterized==0.9.0 ; python_version >= "3.9" and python_version < "4.0"
+sqlparse==0.4.4 ; python_version >= "3.9" and python_version < "4.0"
+typing-extensions==4.6.3 ; python_version >= "3.9" and python_version < "3.11"
+tzdata==2023.3 ; python_version >= "3.9" and python_version < "4.0" and sys_platform == "win32"
